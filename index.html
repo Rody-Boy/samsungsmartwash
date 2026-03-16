@@ -1,259 +1,772 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Samsung Smart Wash — WASH OS Keynote Storyboard</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&display=swap');
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Samsung Smart Wash — Keynote</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@200;300;400;500;600;700&display=swap');
 
-    :root{
-      --bg:#02040c;
-      --deep:#070d1e;
-      --blue:#0e63d9;
-      --blue2:#38a6ff;
-      --line:#53c2ff;
-      --white:#ecf3ff;
-      --muted:#7f93bb;
-    }
+  :root{
+    --black:#000;--deep:#040610;--navy:#0a0d1a;--card:#0c1020;
+    --blue:#1e90ff;--blue-bright:#3da5ff;--blue-glow:#1674d9;
+    --blue-dim:#0c4a8a;--cyan:#40c4ff;
+    --white:#edf0ff;--gray:#6e7a94;--dim:#3a4055;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{width:100%;height:100%;background:var(--black);overflow:hidden;font-family:'DM Sans',sans-serif;color:var(--white);-webkit-font-smoothing:antialiased;}
 
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--white);font-family:'DM Sans',sans-serif}
+  .scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:0;pointer-events:none;transition:opacity 2.4s cubic-bezier(.4,0,.2,1);overflow:hidden;}
+  .scene.active{opacity:1;pointer-events:auto;}
 
-    .slide{
-      position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-      opacity:0;pointer-events:none;transition:opacity 1.4s ease;
-      background:radial-gradient(ellipse at center,var(--deep) 0%, var(--bg) 70%);
-      overflow:hidden;
-    }
-    .slide.active{opacity:1;pointer-events:auto}
+  .mist{position:absolute;width:3px;height:3px;background:rgba(30,144,255,.3);border-radius:50%;animation:mistFloat 14s ease-in-out infinite;pointer-events:none;}
+  @keyframes mistFloat{0%{transform:translate(0,0);opacity:0;}15%{opacity:.5;}50%{transform:translate(var(--mx),var(--my));opacity:.15;}100%{transform:translate(var(--ex),var(--ey));opacity:0;}}
 
-    .mist{position:absolute;width:3px;height:3px;border-radius:50%;background:rgba(56,166,255,.4);animation:float 16s linear infinite}
-    @keyframes float{0%{transform:translate(0,0);opacity:0}20%{opacity:.7}80%{opacity:.2}100%{transform:translate(var(--x),var(--y));opacity:0}}
+  /* ══════ SC1 — OPENING ══════ */
+  #sc1{background:var(--black);}
+  .sc1-ring{position:absolute;border-radius:50%;border:1px solid rgba(30,144,255,.05);animation:ringB 14s ease-in-out infinite;}
+  .sc1-ring:nth-child(1){width:260px;height:260px;animation-delay:0s;}
+  .sc1-ring:nth-child(2){width:460px;height:460px;animation-delay:2.5s;}
+  .sc1-ring:nth-child(3){width:660px;height:660px;animation-delay:5s;}
+  .sc1-ring:nth-child(4){width:860px;height:860px;animation-delay:7.5s;}
+  @keyframes ringB{0%,100%{opacity:.25;transform:scale(1);}50%{opacity:.06;transform:scale(1.04);}}
+  .sc1-samsung{font-weight:300;font-size:14px;letter-spacing:14px;text-transform:uppercase;color:var(--gray);opacity:0;transform:translateY(10px);transition:all 2.8s cubic-bezier(.25,.46,.45,.94);z-index:2;}
+  .sc1-samsung.on{opacity:.65;transform:translateY(0);}
+  .sc1-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,10vw,120px);letter-spacing:6px;margin-top:6px;line-height:1;opacity:0;transform:translateY(18px);transition:all 2.8s cubic-bezier(.25,.46,.45,.94);z-index:2;}
+  .sc1-title.on{opacity:1;transform:translateY(0);}
+  .sc1-title .wash{color:var(--blue-bright);}
+  .sc1-sub{font-weight:200;font-size:clamp(14px,2vw,22px);letter-spacing:8px;text-transform:uppercase;color:var(--blue-bright);margin-top:10px;opacity:0;transition:opacity 3s ease;z-index:2;}
+  .sc1-sub.on{opacity:.8;}
+  .sc1-date{font-size:12px;letter-spacing:5px;color:var(--dim);margin-top:28px;opacity:0;transition:opacity 2.8s ease;z-index:2;}
+  .sc1-date.on{opacity:.5;}
 
-    .title{font-family:'Bebas Neue',sans-serif;letter-spacing:.06em;text-transform:uppercase;font-size:clamp(62px,13vw,220px);line-height:.9;text-align:center}
-    .subtitle{margin-top:18px;font-size:clamp(20px,3.6vw,96px);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-align:center}
+  /* ══════ SC2 — WATER VORTEX → DRUM MORPH ══════ */
+  #sc2{background:radial-gradient(ellipse at 50% 55%,#06101e 0%,var(--black) 80%);}
 
-    /* Slide 1 */
-    #s1{background:radial-gradient(circle at 45% 45%,#0d2a56 0%,#050814 45%,#02040c 80%)}
-    .water-rings{position:absolute;inset:0;display:grid;place-items:center}
-    .water-rings::before,.water-rings::after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(83,194,255,.24)}
-    .water-rings::before{width:32vmin;height:32vmin;animation:pulse 4s ease-in-out infinite}
-    .water-rings::after{width:48vmin;height:48vmin;animation:pulse 4s ease-in-out 1s infinite}
-    @keyframes pulse{0%,100%{transform:scale(1);opacity:.45}50%{transform:scale(1.14);opacity:.1}}
+  .morph-container{
+    position:relative;width:340px;height:340px;
+    display:flex;align-items:center;justify-content:center;
+  }
 
-    /* Slide 2 */
-    #s2 .stack{display:grid;gap:.3em;text-align:center}
-    #s2 .stack .line{font-family:'Bebas Neue',sans-serif;font-size:clamp(72px,12vw,200px);letter-spacing:.08em}
-    #s2 .line:nth-child(2){color:var(--blue2)}
+  /* Water surface — concentric ripples */
+  .water-ring{
+    position:absolute;border-radius:50%;
+    border:1.5px solid rgba(30,144,255,.18);
+    opacity:0;
+    animation:waterAppear 2s ease forwards, waterRipple 4s ease-in-out infinite;
+  }
+  .water-ring:nth-child(1){width:60px;height:60px;animation-delay:0s,2s;}
+  .water-ring:nth-child(2){width:110px;height:110px;animation-delay:.4s,2.4s;}
+  .water-ring:nth-child(3){width:160px;height:160px;animation-delay:.8s,2.8s;}
+  .water-ring:nth-child(4){width:210px;height:210px;animation-delay:1.2s,3.2s;}
+  .water-ring:nth-child(5){width:260px;height:260px;animation-delay:1.6s,3.6s;}
+  .water-ring:nth-child(6){width:310px;height:310px;animation-delay:2s,4s;}
 
-    /* Slide 3 */
-    .split{width:min(86vw,1700px);height:min(66vh,760px);display:grid;grid-template-columns:1fr 1fr;gap:2.2vw}
-    .panel{border:1px solid rgba(83,194,255,.18);border-radius:24px;position:relative;overflow:hidden;background:rgba(9,14,30,.6)}
-    .panel.old{background:linear-gradient(145deg,#2b2c30,#0d0e11)}
-    .panel.new{background:linear-gradient(145deg,#0b1833,#0c2a57)}
-    .panel .tag{position:absolute;left:20px;top:16px;font-size:14px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
-    .kicker{margin-top:26px;font-family:'Bebas Neue';font-size:clamp(42px,5.2vw,120px);letter-spacing:.05em;text-align:center}
-    .kicker .blue{color:var(--blue2)}
+  @keyframes waterAppear{
+    0%{opacity:0;transform:scale(.6);}
+    100%{opacity:1;transform:scale(1);}
+  }
+  @keyframes waterRipple{
+    0%,100%{transform:scale(1);border-color:rgba(30,144,255,.18);}
+    50%{transform:scale(1.06);border-color:rgba(30,144,255,.35);}
+  }
 
-    /* Slide 4 */
-    .chain{display:flex;align-items:center;gap:1.8vw;filter:drop-shadow(0 0 24px rgba(56,166,255,.23));margin-bottom:24px}
-    .node{width:220px;height:220px;border-radius:26px;border:1px solid rgba(83,194,255,.33);display:grid;place-items:center;font-size:66px;background:rgba(10,18,37,.8)}
-    .arrow{font-size:72px;color:var(--blue2);animation:blink 2s infinite}
-    @keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
+  /* Vortex spin — three layers at different speeds for depth */
+  .vortex-layer{
+    position:absolute;width:100%;height:100%;
+    animation:vortexSpin 6s linear infinite;
+  }
+  .vortex-layer.v2{animation:vortexSpin 4.5s linear infinite reverse;}
+  .vortex-layer.v3{animation:vortexSpin 8s linear infinite;}
+  @keyframes vortexSpin{
+    0%{transform:rotate(0);}
+    100%{transform:rotate(360deg);}
+  }
 
-    /* Slide 5 */
-    #s5{background:#01030a}
-    .reveal{font-family:'Bebas Neue';font-size:clamp(110px,22vw,360px);letter-spacing:.08em;text-shadow:0 0 32px rgba(56,166,255,.45)}
-    .reveal .os{color:var(--blue2)}
+  .vortex-streak{
+    position:absolute;
+    width:52%;height:2.5px;
+    top:50%;left:50%;
+    transform-origin:0% 50%;
+    background:linear-gradient(90deg,rgba(30,144,255,.7),rgba(61,165,255,.3) 60%,transparent);
+    border-radius:2px;
+    opacity:0;
+    animation:streakIn 2s ease forwards;
+    filter:blur(0.3px);
+    box-shadow:0 0 6px rgba(30,144,255,.3);
+  }
+  .vortex-streak:nth-child(1){transform:rotate(0deg);animation-delay:1.2s;}
+  .vortex-streak:nth-child(2){transform:rotate(45deg);animation-delay:1.4s;}
+  .vortex-streak:nth-child(3){transform:rotate(90deg);animation-delay:1.6s;}
+  .vortex-streak:nth-child(4){transform:rotate(135deg);animation-delay:1.8s;}
+  .vortex-streak:nth-child(5){transform:rotate(180deg);animation-delay:2.0s;}
+  .vortex-streak:nth-child(6){transform:rotate(225deg);animation-delay:2.2s;}
+  .vortex-streak:nth-child(7){transform:rotate(270deg);animation-delay:2.4s;}
+  .vortex-streak:nth-child(8){transform:rotate(315deg);animation-delay:2.6s;}
+  @keyframes streakIn{0%{opacity:0;width:15%;}100%{opacity:.85;width:52%;}}
 
-    /* Slide 6 */
-    .flow{width:min(95vw,1900px);display:grid;grid-template-columns:repeat(4,1fr);align-items:center;gap:1vw}
-    .flow .box{min-height:190px;border:1px solid rgba(83,194,255,.28);border-radius:18px;background:rgba(9,16,34,.7);display:grid;place-items:center;font-family:'Bebas Neue';font-size:clamp(30px,3.2vw,74px);letter-spacing:.04em;text-align:center;padding:20px}
-    .flow .connector{height:2px;background:linear-gradient(90deg,transparent,var(--line),transparent);position:relative}
+  /* Inner vortex arms — thinner, faster layer */
+  .vortex-arm{
+    position:absolute;
+    width:38%;height:1.5px;
+    top:50%;left:50%;
+    transform-origin:0% 50%;
+    background:linear-gradient(90deg,rgba(61,165,255,.5),transparent);
+    border-radius:1px;
+    opacity:0;
+    animation:armIn 2.5s ease forwards;
+  }
+  .vortex-arm:nth-child(1){transform:rotate(22deg);animation-delay:1.8s;}
+  .vortex-arm:nth-child(2){transform:rotate(67deg);animation-delay:2s;}
+  .vortex-arm:nth-child(3){transform:rotate(112deg);animation-delay:2.2s;}
+  .vortex-arm:nth-child(4){transform:rotate(157deg);animation-delay:2.4s;}
+  .vortex-arm:nth-child(5){transform:rotate(202deg);animation-delay:2.6s;}
+  .vortex-arm:nth-child(6){transform:rotate(247deg);animation-delay:2.8s;}
+  .vortex-arm:nth-child(7){transform:rotate(292deg);animation-delay:3s;}
+  .vortex-arm:nth-child(8){transform:rotate(337deg);animation-delay:3.2s;}
+  @keyframes armIn{0%{opacity:0;width:10%;}100%{opacity:.6;width:38%;}}
 
-    /* Slide 7/8/9 cards */
-    .grid4{width:min(92vw,1800px);display:grid;grid-template-columns:repeat(4,1fr);gap:1.2vw;margin-top:20px}
-    .card{min-height:220px;border-radius:18px;border:1px solid rgba(83,194,255,.26);background:linear-gradient(150deg,rgba(13,24,47,.88),rgba(4,10,22,.95));padding:22px;display:flex;flex-direction:column;justify-content:space-between}
-    .card h3{font-family:'Bebas Neue';font-size:clamp(28px,2.5vw,58px);letter-spacing:.05em;color:var(--blue2)}
-    .card p{font-size:clamp(16px,1.1vw,28px);line-height:1.35;color:#d8e5ff}
+  /* Outer spiral arcs — curved visible current */
+  .spiral-arc{
+    position:absolute;
+    width:140px;height:140px;
+    border-radius:50%;
+    border:2px solid transparent;
+    border-top-color:rgba(30,144,255,.4);
+    border-right-color:rgba(30,144,255,.15);
+    opacity:0;
+    animation:arcIn 2s ease forwards;
+  }
+  .spiral-arc:nth-child(1){width:200px;height:200px;animation-delay:1.5s;}
+  .spiral-arc:nth-child(2){width:260px;height:260px;border-top-color:rgba(30,144,255,.3);animation-delay:2s;}
+  .spiral-arc:nth-child(3){width:320px;height:320px;border-top-color:rgba(30,144,255,.2);animation-delay:2.5s;}
+  @keyframes arcIn{0%{opacity:0;transform:scale(.7);}100%{opacity:1;transform:scale(1);}}
 
-    /* Slide 10 */
-    #s10 .title{font-size:clamp(76px,14vw,250px)}
-    #s10 .subtitle{max-width:75vw}
+  /* Glowing vortex center */
+  .vortex-center{
+    position:absolute;width:40px;height:40px;border-radius:50%;
+    background:radial-gradient(circle,rgba(30,144,255,.5) 0%,rgba(30,144,255,.1) 50%,transparent 70%);
+    opacity:0;
+    animation:centerGlow 1.5s ease .5s forwards, centerPulse 3s ease-in-out 2s infinite;
+    z-index:3;
+  }
+  @keyframes centerGlow{0%{opacity:0;transform:scale(.3);}100%{opacity:1;transform:scale(1);}}
+  @keyframes centerPulse{0%,100%{transform:scale(1);opacity:.8;}50%{transform:scale(1.4);opacity:1;}}
 
-    /* Slide 11 */
-    .logos{display:flex;gap:3vw;align-items:center}
-    .logo{font-family:'Bebas Neue';font-size:clamp(56px,8vw,160px);letter-spacing:.08em}
-    .logo:last-child{color:var(--blue2)}
+  /* Water drops / particles floating up from center */
+  .water-drop{
+    position:absolute;width:4px;height:4px;
+    background:rgba(30,144,255,.5);border-radius:50%;
+    filter:blur(.5px);
+    animation:dropFloat 5s ease-in-out infinite;
+  }
+  @keyframes dropFloat{
+    0%{transform:translate(0,0) scale(1);opacity:0;}
+    20%{opacity:.6;}
+    60%{opacity:.3;}
+    100%{transform:translate(var(--ddx),var(--ddy)) scale(.3);opacity:0;}
+  }
 
-    /* Controls */
-    .hud{position:fixed;z-index:100;left:20px;bottom:16px;color:var(--muted);font-size:12px;letter-spacing:.2em}
-    .bar{position:fixed;z-index:100;left:0;top:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--blue2));transition:width .5s}
-    .ctrl{position:fixed;z-index:100;right:16px;bottom:14px;display:flex;gap:8px}
-    .btn{width:36px;height:36px;border-radius:50%;border:1px solid rgba(83,194,255,.3);background:#091126;color:#c8defe;cursor:pointer}
+  /* The drum that morphs in — starts as transparent, fades to solid */
+  .drum-morph{
+    position:absolute;
+    width:180px;height:180px;border-radius:50%;
+    border:3px solid rgba(30,144,255,0);
+    background:transparent;
+    transition:all 3s cubic-bezier(.25,.46,.45,.94);
+    display:flex;align-items:center;justify-content:center;
+    z-index:5;
+  }
+  .drum-morph.on{
+    border-color:rgba(30,144,255,.45);
+    background:radial-gradient(circle,rgba(10,16,30,.6) 0%,rgba(6,10,20,.9) 100%);
+    box-shadow:0 0 60px rgba(30,144,255,.12),inset 0 0 40px rgba(30,144,255,.06);
+  }
+  .drum-inner{
+    width:50px;height:50px;border-radius:50%;
+    border:2px solid rgba(30,144,255,0);
+    transition:all 3s ease 0.5s;
+  }
+  .drum-morph.on .drum-inner{
+    border-color:rgba(30,144,255,.3);
+    box-shadow:0 0 20px rgba(30,144,255,.08);
+  }
 
-    @media (max-width:1200px){
-      .node{width:140px;height:140px;font-size:40px}
-      .arrow{font-size:40px}
-      .flow{grid-template-columns:1fr 40px 1fr 40px 1fr 40px 1fr}
-      .flow .connector{align-self:center}
-      .grid4{grid-template-columns:1fr 1fr}
-      .split{grid-template-columns:1fr}
-    }
-  </style>
+  /* Cross lines inside drum — appear after morph */
+  .drum-cross{
+    position:absolute;
+    width:100%;height:1.5px;
+    background:rgba(30,144,255,0);
+    transition:background 2.5s ease 1s;
+  }
+  .drum-cross.v{width:1.5px;height:100%;}
+  .drum-morph.on .drum-cross{background:rgba(30,144,255,.12);}
+
+  /* The machine body that fades in around the drum */
+  .machine-shell{
+    position:absolute;
+    width:230px;height:290px;
+    border-radius:18px;
+    border:1.5px solid rgba(30,144,255,0);
+    background:transparent;
+    transition:all 2.5s ease 1.5s;
+    display:flex;align-items:center;justify-content:center;
+    z-index:4;
+  }
+  .machine-shell.on{
+    border-color:rgba(30,144,255,.2);
+    background:linear-gradient(170deg,rgba(21,29,56,.6),rgba(11,17,37,.8));
+    box-shadow:0 0 50px rgba(30,144,255,.05);
+  }
+  .machine-panel{
+    position:absolute;top:18px;left:50%;transform:translateX(-50%);
+    width:80px;height:8px;border-radius:4px;
+    background:rgba(30,144,255,0);
+    transition:background 2s ease 2s;
+  }
+  .machine-shell.on .machine-panel{background:rgba(30,144,255,.15);}
+  .machine-dot{
+    position:absolute;top:22px;
+    width:6px;height:6px;border-radius:50%;
+    background:rgba(30,144,255,0);
+    transition:background 2s ease 2.2s;
+  }
+  .machine-dot.dl{left:30px;}
+  .machine-dot.dr{right:30px;}
+  .machine-shell.on .machine-dot{background:rgba(30,144,255,.2);}
+
+  .sc2-label{
+    font-size:12px;letter-spacing:6px;text-transform:uppercase;
+    color:var(--gray);margin-top:40px;
+    opacity:0;transition:opacity 2.8s ease;z-index:6;
+  }
+  .sc2-label.on{opacity:.55;}
+
+  /* Subtle ambient glow behind everything */
+  .ambient-glow{
+    position:absolute;width:500px;height:500px;border-radius:50%;
+    background:radial-gradient(circle,rgba(30,144,255,.06) 0%,transparent 70%);
+    animation:ambPulse 6s ease-in-out infinite;
+  }
+  @keyframes ambPulse{0%,100%{transform:scale(1);opacity:.6;}50%{transform:scale(1.15);opacity:1;}}
+
+  /* ══════ SC3 — MACHINES ROW ══════ */
+  #sc3{background:radial-gradient(ellipse at 50% 60%,#0b1628 0%,var(--deep) 80%);}
+  .ripple-r{position:absolute;border-radius:50%;border:1px solid rgba(30,144,255,.1);animation:ripG 9s ease-out infinite;}
+  .ripple-r:nth-child(1){width:100px;height:50px;animation-delay:0s;}
+  .ripple-r:nth-child(2){width:200px;height:100px;animation-delay:1.8s;}
+  .ripple-r:nth-child(3){width:300px;height:150px;animation-delay:3.6s;}
+  .ripple-r:nth-child(4){width:400px;height:200px;animation-delay:5.4s;}
+  @keyframes ripG{0%{transform:scale(.4);opacity:.5;}100%{transform:scale(3);opacity:0;}}
+  .mach-row{display:flex;gap:50px;z-index:3;opacity:0;transform:translateY(14px);transition:all 2.5s cubic-bezier(.25,.46,.45,.94);}
+  .mach-row.on{opacity:1;transform:translateY(0);}
+  .wm{width:120px;height:155px;background:linear-gradient(170deg,#151d38,#0b1125);border-radius:14px;border:1px solid rgba(30,144,255,.18);display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 50px rgba(30,144,255,.06);}
+  .wm-drum{width:68px;height:68px;border-radius:50%;border:2.5px solid rgba(30,144,255,.28);animation:dSpin 7s linear infinite;box-shadow:inset 0 0 18px rgba(30,144,255,.08);position:relative;}
+  .wm-drum::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;border:1.5px solid rgba(30,144,255,.2);top:50%;left:50%;transform:translate(-50%,-50%);}
+  @keyframes dSpin{0%{transform:rotate(0);border-color:rgba(30,144,255,.28);}50%{border-color:rgba(30,144,255,.45);}100%{transform:rotate(360deg);border-color:rgba(30,144,255,.28);}}
+  .wm-p{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:50px;height:5px;border-radius:3px;background:rgba(30,144,255,.15);}
+  .sc3-label{font-size:12px;letter-spacing:6px;text-transform:uppercase;color:var(--gray);margin-top:40px;opacity:0;transition:opacity 2.8s ease;z-index:3;}
+  .sc3-label.on{opacity:.55;}
+
+  /* ══════ SC4 — EVERY CITY ══════ */
+  #sc4{background:var(--black);}
+  .hero-line{font-family:'Bebas Neue',sans-serif;font-size:clamp(44px,9vw,100px);letter-spacing:4px;line-height:1.15;text-align:center;opacity:0;transform:translateY(28px);transition:all 2.4s cubic-bezier(.25,.46,.45,.94);}
+  .hero-line.on{opacity:1;transform:translateY(0);}
+  .hero-line .accent{color:var(--blue-bright);}
+
+  /* ══════ SC5 — PROBLEM ══════ */
+  #sc5{background:var(--deep);padding:8%;}
+  .sc5-q{font-weight:300;font-size:clamp(16px,2.6vw,30px);line-height:1.8;text-align:center;max-width:780px;opacity:0;transform:translateY(18px);transition:all 3s cubic-bezier(.25,.46,.45,.94);}
+  .sc5-q.on{opacity:.85;transform:translateY(0);}
+  .sc5-q em{color:var(--blue-bright);font-style:normal;}
+  .sc5-sp{font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--dim);margin-top:36px;opacity:0;transition:opacity 2.8s ease;}
+  .sc5-sp.on{opacity:.45;}
+
+  /* ══════ SC6 — SPLIT ══════ */
+  #sc6{background:var(--deep);}
+  .sp-w{display:flex;width:88%;max-width:1000px;height:52vh;gap:3px;border-radius:18px;overflow:hidden;position:relative;}
+  .sp-h{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:0;transition:all 2.2s ease;}
+  .sp-h.on{opacity:1;}
+  .sp-L{background:linear-gradient(135deg,#1a1a1a,#0d0d0d);}
+  .sp-R{background:linear-gradient(135deg,#0a1225,#060e1e);}
+  .old-shop{width:78%;height:58%;background:linear-gradient(160deg,#2a2520,#1a1510);border-radius:10px;border:1px solid #3a3025;display:flex;align-items:center;justify-content:center;gap:10px;animation:fadeG 5s ease 1.5s forwards;}
+  @keyframes fadeG{to{filter:saturate(0) brightness(.55);}}
+  .old-m{width:40px;height:54px;background:#3a3530;border-radius:7px;border:1px solid #4a4035;display:flex;align-items:center;justify-content:center;}
+  .old-m::after{content:'';width:22px;height:22px;border-radius:50%;border:1.5px solid #5a5045;}
+  .new-app{width:55%;height:62%;background:linear-gradient(160deg,#0d1a35,#0a1228);border-radius:22px;border:1px solid rgba(30,144,255,.28);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;box-shadow:0 0 60px rgba(30,144,255,.08);animation:appP 4.5s ease-in-out infinite;overflow:hidden;}
+  @keyframes appP{0%,100%{box-shadow:0 0 40px rgba(30,144,255,.08);}50%{box-shadow:0 0 90px rgba(30,144,255,.22);}}
+  .a-lines{display:flex;flex-direction:column;gap:7px;width:65%;}
+  .a-ln{height:5px;border-radius:3px;background:rgba(30,144,255,.2);animation:lnG 3.5s ease-in-out infinite;}
+  .a-ln:nth-child(2){width:72%;animation-delay:.6s;}
+  .a-ln:nth-child(3){width:48%;animation-delay:1.2s;}
+  @keyframes lnG{0%,100%{background:rgba(30,144,255,.18);}50%{background:rgba(30,144,255,.45);}}
+  .a-btn{width:48%;height:24px;border-radius:12px;background:linear-gradient(90deg,var(--blue),var(--blue-bright));box-shadow:0 0 18px rgba(30,144,255,.25);margin-top:6px;}
+  .sp-tag{position:absolute;bottom:14px;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--gray);}
+  .vs-b{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44px;height:44px;background:var(--deep);border:1px solid rgba(30,144,255,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;letter-spacing:2px;color:var(--blue);z-index:5;box-shadow:0 0 28px rgba(30,144,255,.12);}
+
+  /* ══════ SC7 — THREE ICONS ══════ */
+  #sc7{background:var(--black);}
+  .sc7-lbl{font-size:11px;letter-spacing:7px;text-transform:uppercase;color:var(--gray);margin-bottom:32px;opacity:0;transition:all 2.2s ease;}
+  .sc7-lbl.on{opacity:.55;}
+  .i-row{display:flex;align-items:center;justify-content:center;gap:90px;position:relative;}
+  .i-node{width:105px;height:105px;border-radius:22px;border:1.5px solid rgba(30,144,255,.22);background:linear-gradient(160deg,#111a30,#0a1020);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;opacity:0;transform:scale(.75);transition:all 1.8s cubic-bezier(.25,.46,.45,.94);box-shadow:0 0 30px rgba(30,144,255,.04);}
+  .i-node.on{opacity:1;transform:scale(1);box-shadow:0 0 45px rgba(30,144,255,.1);}
+  .i-node svg{width:34px;height:34px;}
+  .i-lbl{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gray);}
+  .nrg{position:absolute;top:50%;height:2px;background:linear-gradient(90deg,transparent,var(--blue),transparent);opacity:0;transition:all 2.2s ease;transform:translateY(-50%);}
+  .nrg.on{opacity:.5;}
+  .nrg.n1{left:calc(50% - 150px);width:110px;}
+  .nrg.n2{left:calc(50% + 42px);width:110px;}
+  .nrg::after{content:'';position:absolute;top:-2px;width:14px;height:6px;background:var(--blue-bright);border-radius:3px;filter:blur(2px);animation:ep 3.5s ease-in-out infinite;}
+  @keyframes ep{0%{left:0;opacity:0;}20%{opacity:1;}80%{opacity:1;}100%{left:100%;opacity:0;}}
+
+  /* ══════ SC8 — FUTURE QUESTION ══════ */
+  #sc8{background:var(--deep);padding:8%;}
+  .sc8-t{font-weight:300;font-size:clamp(16px,2.4vw,28px);line-height:1.8;text-align:center;max-width:720px;opacity:0;transform:translateY(16px);transition:all 2.8s ease;}
+  .sc8-t.on{opacity:.8;transform:translateY(0);}
+  .sc8-t em{color:var(--blue-bright);font-style:normal;}
+
+  /* ══════ SC9 — WASH OS ══════ */
+  #sc9{background:var(--black);}
+  .burst{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(30,144,255,.3) 0%,transparent 70%);opacity:0;transform:scale(.1);transition:all 2.8s cubic-bezier(.16,1,.3,1);}
+  .burst.on{opacity:1;transform:scale(1.6);}
+  .burst.dim{opacity:0;transition:opacity 3.5s ease;}
+  .washos{font-family:'Bebas Neue',sans-serif;font-size:clamp(64px,14vw,170px);letter-spacing:8px;opacity:0;transform:scale(2.8);transition:all 2.8s cubic-bezier(.16,1,.3,1);text-shadow:0 0 100px rgba(30,144,255,.45),0 0 200px rgba(30,144,255,.15);z-index:2;}
+  .washos.on{opacity:1;transform:scale(1);}
+  .washos .os{color:var(--blue-bright);}
+  .washos-sub{font-size:14px;letter-spacing:8px;text-transform:uppercase;color:var(--gray);margin-top:24px;opacity:0;transition:opacity 3s ease;z-index:2;}
+  .washos-sub.on{opacity:.6;}
+  .scatter{position:absolute;width:3px;height:3px;background:var(--blue-bright);border-radius:50%;opacity:0;}
+
+  /* ══════ SC10 — FEATURES ══════ */
+  #sc10{background:var(--deep);}
+  .sc10-lbl{font-size:11px;letter-spacing:8px;text-transform:uppercase;color:var(--blue-bright);margin-bottom:14px;opacity:0;transition:all 2s ease;}
+  .sc10-lbl.on{opacity:.7;}
+  .sc10-ttl{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,7vw,76px);letter-spacing:3px;text-align:center;opacity:0;transform:translateY(18px);transition:all 2.2s ease;}
+  .sc10-ttl.on{opacity:1;transform:translateY(0);}
+  .sc10-ttl .ac{color:var(--blue-bright);}
+  .fg{display:flex;gap:24px;margin-top:36px;flex-wrap:wrap;justify-content:center;}
+  .fc{width:155px;padding:18px 14px;border-radius:16px;border:1px solid rgba(30,144,255,.1);background:rgba(12,16,32,.7);text-align:center;opacity:0;transform:translateY(18px);transition:all 1.8s ease;}
+  .fc.on{opacity:1;transform:translateY(0);}
+  .fc-i{margin-bottom:8px;display:flex;align-items:center;justify-content:center;}
+  .fc-n{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--white);margin-bottom:4px;}
+  .fc-d{font-size:9px;color:var(--gray);line-height:1.5;}
+
+  /* ══════ SC11 — MACHINES ══════ */
+  #sc11{background:var(--black);}
+  .sc11-lbl{font-size:11px;letter-spacing:8px;text-transform:uppercase;color:var(--blue-bright);margin-bottom:14px;opacity:0;transition:all 2s ease;}
+  .sc11-lbl.on{opacity:.7;}
+  .sc11-ttl{font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,6vw,68px);letter-spacing:3px;text-align:center;opacity:0;transform:translateY(18px);transition:all 2.2s ease;}
+  .sc11-ttl.on{opacity:1;transform:translateY(0);}
+  .sr{display:flex;gap:44px;margin-top:36px;flex-wrap:wrap;justify-content:center;}
+  .si{text-align:center;opacity:0;transform:translateY(14px);transition:all 1.8s ease;}
+  .si.on{opacity:1;transform:translateY(0);}
+  .si-n{font-family:'Bebas Neue',sans-serif;font-size:clamp(34px,5vw,56px);color:var(--blue-bright);line-height:1;}
+  .si-u{font-size:12px;color:var(--gray);letter-spacing:3px;text-transform:uppercase;}
+  .si-d{font-size:9px;color:var(--dim);margin-top:3px;letter-spacing:1px;}
+
+  /* ══════ SC12 — ECOSYSTEM ══════ */
+  #sc12{background:var(--deep);}
+  .sc12-lbl{font-size:11px;letter-spacing:7px;text-transform:uppercase;color:var(--gray);margin-bottom:20px;opacity:0;transition:all 2s ease;}
+  .sc12-lbl.on{opacity:.55;}
+  .eco{position:relative;width:480px;height:380px;}
+  .en{position:absolute;width:88px;height:88px;border-radius:50%;border:1.5px solid rgba(30,144,255,.22);background:linear-gradient(160deg,#111a30,#0a1020);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;opacity:0;transform:scale(.55);transition:all 2s cubic-bezier(.25,.46,.45,.94);}
+  .en.on{opacity:1;transform:scale(1);}
+  .en svg{width:22px;height:22px;}
+  .enl{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);text-align:center;}
+  .ehub{left:50%;top:50%;transform:translate(-50%,-50%) scale(.55);width:105px;height:105px;border-color:rgba(30,144,255,.35);}
+  .ehub.on{transform:translate(-50%,-50%) scale(1);box-shadow:0 0 55px rgba(30,144,255,.12);}
+  .etop{left:50%;top:3%;transform:translate(-50%,0) scale(.55);}.etop.on{transform:translate(-50%,0) scale(1);}
+  .ert{right:3%;top:50%;transform:translate(0,-50%) scale(.55);}.ert.on{transform:translate(0,-50%) scale(1);}
+  .ebt{left:50%;bottom:3%;transform:translate(-50%,0) scale(.55);}.ebt.on{transform:translate(-50%,0) scale(1);}
+  .elt{left:3%;top:50%;transform:translate(0,-50%) scale(.55);}.elt.on{transform:translate(0,-50%) scale(1);}
+  .esvg{position:absolute;inset:0;z-index:0;}.esvg svg{width:100%;height:100%;}
+  .ep{stroke:var(--blue);stroke-width:1;fill:none;opacity:0;stroke-dasharray:300;stroke-dashoffset:300;transition:all 3.2s ease;}
+  .ep.on{opacity:.28;stroke-dashoffset:0;}
+
+  /* ══════ SC13 — APP ══════ */
+  #sc13{background:var(--black);}
+  .sc13-lbl{font-size:11px;letter-spacing:8px;text-transform:uppercase;color:var(--blue-bright);margin-bottom:14px;opacity:0;transition:all 2s ease;}
+  .sc13-lbl.on{opacity:.7;}
+  .sc13-ttl{font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,6vw,68px);letter-spacing:3px;text-align:center;opacity:0;transform:translateY(18px);transition:all 2.2s ease;}
+  .sc13-ttl.on{opacity:1;transform:translateY(0);}
+  .apf{display:flex;gap:18px;margin-top:34px;flex-wrap:wrap;justify-content:center;opacity:0;transition:opacity 2.5s ease;}
+  .apf.on{opacity:.6;}
+  .ap{font-size:10px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;padding:7px 16px;border:1px solid rgba(30,144,255,.12);border-radius:18px;}
+
+  /* ══════ SC14 — VISION ══════ */
+  #sc14{background:var(--deep);padding:8%;}
+  .sc14-t{font-weight:300;font-size:clamp(16px,2.4vw,28px);line-height:1.8;text-align:center;max-width:700px;opacity:0;transform:translateY(16px);transition:all 2.8s ease;}
+  .sc14-t.on{opacity:.8;transform:translateY(0);}
+  .sc14-t em{color:var(--blue-bright);font-style:normal;}
+
+  /* ══════ SC15 — PARTNERS ══════ */
+  #sc15{background:var(--black);}
+  .sc15-lbl{font-size:11px;letter-spacing:7px;text-transform:uppercase;color:var(--gray);margin-bottom:28px;opacity:0;transition:all 2s ease;}
+  .sc15-lbl.on{opacity:.55;}
+  .sc15-ttl{font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,6vw,68px);letter-spacing:3px;text-align:center;opacity:0;transform:translateY(18px);transition:all 2.2s ease;}
+  .sc15-ttl.on{opacity:1;transform:translateY(0);}
+  .ptr{display:flex;gap:36px;margin-top:36px;flex-wrap:wrap;justify-content:center;}
+  .pt{width:120px;height:64px;border-radius:14px;border:1px solid rgba(30,144,255,.1);background:rgba(12,16,32,.6);display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gray);opacity:0;transform:scale(.85);transition:all 1.8s ease;}
+  .pt.on{opacity:1;transform:scale(1);}
+
+  /* ══════ SC16 — CLOSE ══════ */
+  #sc16{background:var(--black);}
+  .sc16-glow{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(30,144,255,.1) 0%,transparent 70%);opacity:0;transition:opacity 3.5s ease;}
+  .sc16-glow.on{opacity:1;}
+  .sc16-sam{font-weight:300;font-size:13px;letter-spacing:12px;text-transform:uppercase;color:var(--gray);opacity:0;transition:opacity 3.2s ease;z-index:2;}
+  .sc16-sam.on{opacity:.55;}
+  .sc16-logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(38px,7vw,76px);letter-spacing:6px;margin-top:4px;opacity:0;transition:opacity 3.2s ease;z-index:2;}
+  .sc16-logo.on{opacity:1;}
+  .sc16-logo .sm{color:var(--white);}.sc16-logo .ws{color:var(--blue-bright);}
+  .sc16-tag{font-weight:300;font-size:13px;letter-spacing:6px;text-transform:uppercase;color:var(--dim);margin-top:18px;opacity:0;transition:opacity 3.2s ease;z-index:2;}
+  .sc16-tag.on{opacity:.4;}
+
+  /* ══════ UI ══════ */
+  .prog{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--blue-dim),var(--blue-bright));z-index:200;transition:width .8s ease;}
+  .ctrls{position:fixed;bottom:16px;right:16px;z-index:200;display:flex;gap:6px;}
+  .cb{width:36px;height:36px;border-radius:50%;border:1px solid rgba(30,144,255,.14);background:rgba(4,6,10,.85);backdrop-filter:blur(8px);color:var(--gray);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .3s;}
+  .cb:hover{border-color:var(--blue);color:var(--blue-bright);}
+  .cnt{position:fixed;bottom:20px;left:20px;font-size:10px;letter-spacing:4px;color:var(--dim);z-index:200;font-variant-numeric:tabular-nums;}
+</style>
 </head>
 <body>
-  <div class="bar" id="bar"></div>
 
-  <section class="slide active" id="s1">
-    <div class="water-rings"></div>
-    <div class="subtitle">Samsung</div>
-    <div class="title">Smart Wash</div>
-    <div class="subtitle">Powered by WASH OS</div>
-  </section>
+<!-- SC1 -->
+<div class="scene active" id="sc1">
+  <div class="sc1-ring"></div><div class="sc1-ring"></div><div class="sc1-ring"></div><div class="sc1-ring"></div>
+  <div class="sc1-samsung" id="z1a">Samsung</div>
+  <div class="sc1-title" id="z1b">Smart <span class="wash">Wash</span></div>
+  <div class="sc1-sub" id="z1c">Product Launch 2026</div>
+  <div class="sc1-date" id="z1d">The Future of Connected Laundry</div>
+</div>
 
-  <section class="slide" id="s2">
-    <div class="stack">
-      <div class="line">Every City</div>
-      <div class="line">Every Community</div>
-      <div class="line">Every Day</div>
+<!-- SC2 — WATER VORTEX → DRUM MORPH -->
+<div class="scene" id="sc2">
+  <div class="ambient-glow"></div>
+  <div class="morph-container">
+    <!-- Water rings -->
+    <div class="water-ring"></div><div class="water-ring"></div><div class="water-ring"></div>
+    <div class="water-ring"></div><div class="water-ring"></div><div class="water-ring"></div>
+    <!-- Vortex streaks — primary layer -->
+    <div class="vortex-layer">
+      <div class="vortex-streak"></div><div class="vortex-streak"></div>
+      <div class="vortex-streak"></div><div class="vortex-streak"></div>
+      <div class="vortex-streak"></div><div class="vortex-streak"></div>
+      <div class="vortex-streak"></div><div class="vortex-streak"></div>
     </div>
-    <div class="subtitle">Laundry Is Universal</div>
-  </section>
-
-  <section class="slide" id="s3">
-    <div class="split">
-      <div class="panel old"><div class="tag">Old Operations</div></div>
-      <div class="panel new"><div class="tag">Digital Customers</div></div>
+    <!-- Vortex arms — secondary counter-rotating layer -->
+    <div class="vortex-layer v2">
+      <div class="vortex-arm"></div><div class="vortex-arm"></div>
+      <div class="vortex-arm"></div><div class="vortex-arm"></div>
+      <div class="vortex-arm"></div><div class="vortex-arm"></div>
+      <div class="vortex-arm"></div><div class="vortex-arm"></div>
     </div>
-    <div class="kicker">Customers Have Changed. <span class="blue">Operations Have Not.</span></div>
-  </section>
-
-  <section class="slide" id="s4">
-    <div class="chain">
-      <div class="node">🧺</div><div class="arrow">→</div>
-      <div class="node">☁️</div><div class="arrow">→</div>
-      <div class="node">📱</div>
+    <!-- Spiral arcs — slow outer ring -->
+    <div class="vortex-layer v3">
+      <div class="spiral-arc"></div><div class="spiral-arc"></div><div class="spiral-arc"></div>
     </div>
-    <div class="title">What If Every Machine Became Connected?</div>
-  </section>
-
-  <section class="slide" id="s5">
-    <div class="subtitle">To make this future possible…</div>
-    <div class="reveal">WASH <span class="os">OS</span></div>
-    <div class="subtitle">The Operating System for Modern Laundry</div>
-  </section>
-
-  <section class="slide" id="s6">
-    <div class="subtitle">The Ecosystem</div>
-    <div class="flow">
-      <div class="box">Customers</div><div class="connector"></div>
-      <div class="box">WASH OS Platform</div><div class="connector"></div>
-      <div class="box">Laundry Shops</div><div class="connector"></div>
-      <div class="box">Samsung Smart Machines</div>
+    <!-- Glowing center -->
+    <div class="vortex-center"></div>
+    <!-- Machine shell morphs in -->
+    <div class="machine-shell" id="z2shell">
+      <div class="machine-panel"></div>
+      <div class="machine-dot dl"></div>
+      <div class="machine-dot dr"></div>
     </div>
-  </section>
-
-  <section class="slide" id="s7">
-    <div class="title">Customer Experience</div>
-    <div class="grid4">
-      <div class="card"><h3>Find Shops</h3><p>Discover nearby laundry locations instantly.</p></div>
-      <div class="card"><h3>Book Machines</h3><p>Reserve available machines in real time.</p></div>
-      <div class="card"><h3>Track Progress</h3><p>See cycle status and completion updates.</p></div>
-      <div class="card"><h3>Pay Digitally</h3><p>Cashless, fast, and frictionless checkout.</p></div>
+    <!-- Drum morphs from water center -->
+    <div class="drum-morph" id="z2drum">
+      <div class="drum-cross"></div>
+      <div class="drum-cross v"></div>
+      <div class="drum-inner"></div>
     </div>
-  </section>
-
-  <section class="slide" id="s8">
-    <div class="title">Laundry Shop Operations</div>
-    <div class="subtitle">A Complete Operating System</div>
-    <div class="grid4">
-      <div class="card"><h3>Orders</h3><p>Unified order queue for all machines and services.</p></div>
-      <div class="card"><h3>Payments</h3><p>Digital reconciliation and transaction tracking.</p></div>
-      <div class="card"><h3>Inventory</h3><p>Supplies and consumables at a glance.</p></div>
-      <div class="card"><h3>Analytics</h3><p>Revenue and utilization insights for growth.</p></div>
-    </div>
-  </section>
-
-  <section class="slide" id="s9">
-    <div class="title">Smart Machines</div>
-    <div class="subtitle">Connected · Intelligent · Monitored</div>
-    <div class="grid4">
-      <div class="card"><h3>Status</h3><p>Always-on machine health visibility.</p></div>
-      <div class="card"><h3>Cycle Progress</h3><p>Real-time cycle telemetry in the platform.</p></div>
-      <div class="card"><h3>Alerts</h3><p>Instant notifications for service events.</p></div>
-      <div class="card"><h3>Remote Ops</h3><p>Centralized monitoring across all locations.</p></div>
-    </div>
-  </section>
-
-  <section class="slide" id="s10">
-    <div class="title">Laundry Is Becoming</div>
-    <div class="title" style="color:var(--blue2)">A Digital Service Network</div>
-    <div class="subtitle">From isolated shops to connected infrastructure</div>
-  </section>
-
-  <section class="slide" id="s11">
-    <div class="logos"><div class="logo">Samsung Smart Wash</div><div class="logo">WASH OS</div></div>
-    <div class="subtitle">Together, we are building the future of connected laundry.</div>
-  </section>
-
-  <div class="hud" id="count">01 / 11</div>
-  <div class="ctrl">
-    <button class="btn" id="prev">◂</button>
-    <button class="btn" id="play">II</button>
-    <button class="btn" id="next">▸</button>
   </div>
+  <div class="sc2-label" id="z2lbl">Water Becomes Intelligence</div>
+</div>
 
-  <script>
-    const slides=[...document.querySelectorAll('.slide')];
-    const total=slides.length;
-    let i=0,auto=true,timer=null;
-    const durations=[9000,8500,9000,8500,9000,9000,9000,9000,9000,8500,9000];
+<!-- SC3 -->
+<div class="scene" id="sc3">
+  <div class="ripple-r"></div><div class="ripple-r"></div><div class="ripple-r"></div><div class="ripple-r"></div>
+  <div class="mach-row" id="z3a">
+    <div class="wm"><div class="wm-p"></div><div class="wm-drum"></div></div>
+    <div class="wm"><div class="wm-p"></div><div class="wm-drum"></div></div>
+    <div class="wm"><div class="wm-p"></div><div class="wm-drum"></div></div>
+  </div>
+  <div class="sc3-label" id="z3b">Samsung Front-Load Technology</div>
+</div>
 
-    function mistFor(slide,count=16){
-      for(let k=0;k<count;k++){
-        const m=document.createElement('div');
-        m.className='mist';
-        m.style.left=Math.random()*100+'%';
-        m.style.top=Math.random()*100+'%';
-        m.style.setProperty('--x',(Math.random()*220-110)+'px');
-        m.style.setProperty('--y',(-80-Math.random()*220)+'px');
-        m.style.animationDelay=(Math.random()*12)+'s';
-        m.style.animationDuration=(12+Math.random()*8)+'s';
-        slide.appendChild(m);
+<!-- SC4 -->
+<div class="scene" id="sc4">
+  <div class="hero-line" id="z4a">Every <span class="accent">City</span></div>
+  <div class="hero-line" id="z4b">Every <span class="accent">Community</span></div>
+  <div class="hero-line" id="z4c">Every <span class="accent">Day</span></div>
+</div>
+
+<!-- SC5 -->
+<div class="scene" id="sc5">
+  <div class="sc5-q" id="z5a">Laundry is one of the most <em>universal</em> daily tasks — yet the experience has barely changed in decades. We believe it's time for <em>intelligent infrastructure</em> that works quietly in the background.</div>
+  <div class="sc5-sp" id="z5b">Samsung Smart Wash · Vision Statement</div>
+</div>
+
+<!-- SC6 -->
+<div class="scene" id="sc6">
+  <div class="sp-w">
+    <div class="sp-h sp-L" id="z6a">
+      <div class="old-shop"><div class="old-m"></div><div class="old-m"></div><div class="old-m"></div></div>
+      <span class="sp-tag">Yesterday</span>
+    </div>
+    <div class="sp-h sp-R" id="z6b">
+      <div class="new-app"><div class="a-lines"><div class="a-ln"></div><div class="a-ln"></div><div class="a-ln"></div></div><div class="a-btn"></div></div>
+      <span class="sp-tag">Tomorrow</span>
+    </div>
+    <div class="vs-b">VS</div>
+  </div>
+</div>
+
+<!-- SC7 -->
+<div class="scene" id="sc7">
+  <div class="sc7-lbl" id="z7a">The Connected Laundry Ecosystem</div>
+  <div class="i-row">
+    <div class="nrg n1" id="z7e1"></div><div class="nrg n2" id="z7e2"></div>
+    <div class="i-node" id="z7b">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="2" width="18" height="20" rx="3" stroke="var(--blue)" stroke-width="1.5"/><circle cx="12" cy="14" r="5" stroke="var(--blue)" stroke-width="1.5"/><line x1="8" y1="6" x2="16" y2="6" stroke="var(--blue)" stroke-width="1.5"/></svg>
+      <span class="i-lbl">Machine</span>
+    </div>
+    <div class="i-node" id="z7c">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M6 7c-2.2 0-4 1.5-4 3.4 0 1.8 1.5 3.3 3.4 3.3h13.2c1.9 0 3.4-1.5 3.4-3.3C22 8.5 20.2 7 18 7c-.4-2.3-2.4-4-4.8-4-2 0-3.7 1.2-4.4 2.9C7.5 5.6 6 6.7 6 7z" stroke="var(--blue)" stroke-width="1.5"/><line x1="4" y1="17" x2="20" y2="17" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span class="i-lbl">Cloud</span>
+    </div>
+    <div class="i-node" id="z7d">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="6" y="2" width="12" height="20" rx="3" stroke="var(--blue)" stroke-width="1.5"/><line x1="10" y1="18" x2="14" y2="18" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span class="i-lbl">App</span>
+    </div>
+  </div>
+</div>
+
+<!-- SC8 -->
+<div class="scene" id="sc8">
+  <div class="sc8-t" id="z8a">What if your washing machine could <em>talk to the cloud</em>, your phone could <em>manage every cycle</em>, and laundry shops could run on <em>pure intelligence</em>?</div>
+</div>
+
+<!-- SC9 — WASH OS -->
+<div class="scene" id="sc9">
+  <div class="burst" id="z9burst"></div>
+  <div class="washos" id="z9a">WASH&nbsp;<span class="os">OS</span></div>
+  <div class="washos-sub" id="z9b">The Intelligence Behind Every Cycle</div>
+</div>
+
+<!-- SC10 -->
+<div class="scene" id="sc10">
+  <div class="sc10-lbl" id="z10a">Powered By</div>
+  <div class="sc10-ttl" id="z10b">Wash <span class="ac">OS</span> Platform</div>
+  <div class="fg">
+    <div class="fc" id="z10c"><div class="fc-i"><svg viewBox="0 0 24 24" width="26" height="26" fill="none"><circle cx="12" cy="12" r="9" stroke="var(--blue)" stroke-width="1.5"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="fc-n">Real-Time</div><div class="fc-d">Live machine status & cycle monitoring from anywhere</div></div>
+    <div class="fc" id="z10d"><div class="fc-i"><svg viewBox="0 0 24 24" width="26" height="26" fill="none"><path d="M12 2a7 7 0 017 7c0 3-2 5-3.5 6.5L12 19l-3.5-3.5C7 14 5 12 5 9a7 7 0 017-7z" stroke="var(--blue)" stroke-width="1.5"/><circle cx="12" cy="9" r="2.5" stroke="var(--blue)" stroke-width="1.5"/><path d="M8 21h8" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="fc-n">AI Optimize</div><div class="fc-d">Smart cycle recommendations based on fabric & load</div></div>
+    <div class="fc" id="z10e"><div class="fc-i"><svg viewBox="0 0 24 24" width="26" height="26" fill="none"><rect x="2" y="5" width="20" height="14" rx="3" stroke="var(--blue)" stroke-width="1.5"/><path d="M2 10h20" stroke="var(--blue)" stroke-width="1.5"/><path d="M6 15h4" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="fc-n">Cashless Pay</div><div class="fc-d">Tap, scan, or auto-pay through the mobile app</div></div>
+    <div class="fc" id="z10f"><div class="fc-i"><svg viewBox="0 0 24 24" width="26" height="26" fill="none"><path d="M4 20V10l4-3v13M10 20V8l4-3v15M16 20V6l4-3v17" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="fc-n">Analytics</div><div class="fc-d">Shop owners get full revenue & usage dashboards</div></div>
+  </div>
+</div>
+
+<!-- SC11 -->
+<div class="scene" id="sc11">
+  <div class="sc11-lbl" id="z11a">Samsung Smart Wash Machines</div>
+  <div class="sc11-ttl" id="z11b">Built for Commercial Intelligence</div>
+  <div class="sr">
+    <div class="si" id="z11c"><div class="si-n">IoT</div><div class="si-u">Connected</div><div class="si-d">Always online via Wash OS</div></div>
+    <div class="si" id="z11d"><div class="si-n">AI</div><div class="si-u">Diagnostics</div><div class="si-d">Predictive maintenance</div></div>
+    <div class="si" id="z11e"><div class="si-n">40%</div><div class="si-u">Less Water</div><div class="si-d">Eco-intelligent cycles</div></div>
+    <div class="si" id="z11f"><div class="si-n">24/7</div><div class="si-u">Monitoring</div><div class="si-d">Remote management</div></div>
+  </div>
+</div>
+
+<!-- SC12 -->
+<div class="scene" id="sc12">
+  <div class="sc12-lbl" id="z12lbl">Complete Ecosystem Architecture</div>
+  <div class="eco">
+    <div class="esvg"><svg viewBox="0 0 480 380">
+      <line class="ep" id="z12p1" x1="240" y1="145" x2="240" y2="60"/>
+      <line class="ep" id="z12p2" x1="295" y1="190" x2="385" y2="190"/>
+      <line class="ep" id="z12p3" x1="240" y1="245" x2="240" y2="320"/>
+      <line class="ep" id="z12p4" x1="185" y1="190" x2="95" y2="190"/>
+    </svg></div>
+    <div class="en ehub" id="z12hub">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M6 7c-2.2 0-4 1.5-4 3.4 0 1.8 1.5 3.3 3.4 3.3h13.2c1.9 0 3.4-1.5 3.4-3.3C22 8.5 20.2 7 18 7c-.4-2.3-2.4-4-4.8-4-2 0-3.7 1.2-4.4 2.9C7.5 5.6 6 6.7 6 7z" stroke="var(--blue)" stroke-width="1.5"/></svg>
+      <span class="enl">Wash OS<br>Cloud</span>
+    </div>
+    <div class="en etop" id="z12top">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="var(--blue)" stroke-width="1.5"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="var(--blue)" stroke-width="1.5"/></svg>
+      <span class="enl">Customers</span>
+    </div>
+    <div class="en ert" id="z12rt">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="2" width="18" height="20" rx="3" stroke="var(--blue)" stroke-width="1.5"/><circle cx="12" cy="14" r="5" stroke="var(--blue)" stroke-width="1.5"/></svg>
+      <span class="enl">Samsung<br>Machines</span>
+    </div>
+    <div class="en ebt" id="z12bt">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M3 10l1-6h16l1 6M3 10v10h18V10M3 10h18" stroke="var(--blue)" stroke-width="1.5"/><rect x="9" y="14" width="6" height="6" stroke="var(--blue)" stroke-width="1.5"/></svg>
+      <span class="enl">Laundry<br>Shops</span>
+    </div>
+    <div class="en elt" id="z12lt">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="6" y="2" width="12" height="20" rx="3" stroke="var(--blue)" stroke-width="1.5"/><line x1="10" y1="18" x2="14" y2="18" stroke="var(--blue)" stroke-width="1.5"/></svg>
+      <span class="enl">Mobile<br>App</span>
+    </div>
+  </div>
+</div>
+
+<!-- SC13 -->
+<div class="scene" id="sc13">
+  <div class="sc13-lbl" id="z13a">Samsung Smart Wash App</div>
+  <div class="sc13-ttl" id="z13b">Laundry in Your Pocket</div>
+  <div class="apf" id="z13c">
+    <div class="ap">Find Nearby Shops</div><div class="ap">Live Machine Status</div>
+    <div class="ap">Reserve & Pay</div><div class="ap">Cycle Notifications</div><div class="ap">Usage History</div>
+  </div>
+</div>
+
+<!-- SC14 -->
+<div class="scene" id="sc14">
+  <div class="sc14-t" id="z14a">From <em>every city</em> to <em>every community</em> — Samsung Smart Wash is building laundry infrastructure that's <em>intelligent</em>, <em>connected</em>, and designed for the way people actually live.</div>
+</div>
+
+<!-- SC15 -->
+<div class="scene" id="sc15">
+  <div class="sc15-lbl" id="z15a">Built With</div>
+  <div class="sc15-ttl" id="z15b">Open Platform Partners</div>
+  <div class="ptr">
+    <div class="pt" id="z15c">Laundry Shops</div><div class="pt" id="z15d">Property Mgmt</div>
+    <div class="pt" id="z15e">Universities</div><div class="pt" id="z15f">Hotels</div>
+  </div>
+</div>
+
+<!-- SC16 -->
+<div class="scene" id="sc16">
+  <div class="sc16-glow" id="z16glow"></div>
+  <div class="sc16-sam" id="z16a">Samsung</div>
+  <div class="sc16-logo" id="z16b"><span class="sm">Smart </span><span class="ws">Wash</span></div>
+  <div class="sc16-tag" id="z16c">The Future of Laundry Is Connected</div>
+</div>
+
+<div class="prog" id="prog"></div>
+<div class="ctrls"><button class="cb" id="bP">◂</button><button class="cb" id="bA">II</button><button class="cb" id="bN">▸</button></div>
+<div class="cnt" id="cnt">01 / 16</div>
+
+<script>
+const T=16,S=[];
+for(let i=1;i<=T;i++)S.push(document.getElementById('sc'+i));
+let cur=0,play=true,tmr=null;
+
+const dur=[
+  9000,  // 1  Opening
+  12000, // 2  Water→Drum morph
+  10000, // 3  Machines row
+  11000, // 4  Every City
+  11000, // 5  Problem
+  10000, // 6  Split
+  11000, // 7  Three Icons
+  10000, // 8  Future question
+  10000, // 9  WASH OS
+  11000, // 10 Features
+  10000, // 11 Machines specs
+  12000, // 12 Ecosystem
+  9000,  // 13 App
+  10000, // 14 Vision
+  9000,  // 15 Partners
+  10000  // 16 Close
+];
+
+// Particles
+[0,1,2,8,15].forEach(i=>{for(let j=0;j<18;j++){
+  const p=document.createElement('div');p.className='mist';
+  p.style.left=Math.random()*100+'%';p.style.top=Math.random()*100+'%';
+  p.style.setProperty('--mx',(Math.random()*100-50)+'px');
+  p.style.setProperty('--my',(Math.random()*-70-15)+'px');
+  p.style.setProperty('--ex',(Math.random()*150-75)+'px');
+  p.style.setProperty('--ey',(Math.random()*-110-25)+'px');
+  p.style.animationDelay=(Math.random()*12)+'s';
+  p.style.animationDuration=(10+Math.random()*8)+'s';
+  S[i].appendChild(p);
+}});
+
+// Water drops for sc2
+const sc2=document.getElementById('sc2');
+for(let j=0;j<20;j++){
+  const d=document.createElement('div');d.className='water-drop';
+  d.style.left='50%';d.style.top='50%';
+  const ang=Math.random()*Math.PI*2;
+  d.style.setProperty('--ddx',Math.cos(ang)*(40+Math.random()*100)+'px');
+  d.style.setProperty('--ddy',Math.sin(ang)*(40+Math.random()*100)+'px');
+  d.style.animationDelay=(Math.random()*5)+'s';
+  d.style.animationDuration=(4+Math.random()*4)+'s';
+  sc2.querySelector('.morph-container').appendChild(d);
+}
+
+const anim={
+  0:[[900,'z1a'],[2400,'z1b'],[4200,'z1c'],[5800,'z1d']],
+  1:[[5500,'z2drum'],[6500,'z2shell'],[8500,'z2lbl']],
+  2:[[1000,'z3a'],[4500,'z3b']],
+  3:[[1000,'z4a'],[3400,'z4b'],[5800,'z4c']],
+  4:[[1000,'z5a'],[5000,'z5b']],
+  5:[[800,'z6a'],[2200,'z6b']],
+  6:[[800,'z7a'],[2200,'z7b'],[4000,'z7c'],[5800,'z7d'],[7200,'z7e1'],[7200,'z7e2']],
+  7:[[1200,'z8a']],
+  8:[[1600,'z9burst'],[1800,'z9a'],[5500,'z9b']],
+  9:[[800,'z10a'],[1800,'z10b'],[3400,'z10c'],[4600,'z10d'],[5800,'z10e'],[7000,'z10f']],
+  10:[[800,'z11a'],[1800,'z11b'],[3400,'z11c'],[4400,'z11d'],[5400,'z11e'],[6400,'z11f']],
+  11:[[800,'z12lbl'],[2000,'z12hub'],[3400,'z12top'],[3600,'z12p1'],[5000,'z12rt'],[5200,'z12p2'],[6600,'z12bt'],[6800,'z12p3'],[8200,'z12lt'],[8400,'z12p4']],
+  12:[[800,'z13a'],[1800,'z13b'],[3400,'z13c']],
+  13:[[1200,'z14a']],
+  14:[[800,'z15a'],[1800,'z15b'],[3200,'z15c'],[3800,'z15d'],[4400,'z15e'],[5000,'z15f']],
+  15:[[1200,'z16glow'],[2400,'z16a'],[3800,'z16b'],[5800,'z16c']]
+};
+
+let act=[];
+
+function show(i){
+  act.forEach(t=>clearTimeout(t));act=[];
+  document.querySelectorAll('.on').forEach(el=>el.classList.remove('on'));
+  const br=document.getElementById('z9burst');if(br)br.classList.remove('on','dim');
+  S.forEach(s=>s.classList.remove('active'));
+  S[i].classList.add('active');cur=i;
+  document.getElementById('cnt').textContent=String(i+1).padStart(2,'0')+' / '+T;
+  document.getElementById('prog').style.width=((i+1)/T*100)+'%';
+
+  (anim[i]||[]).forEach(([d,id])=>{
+    act.push(setTimeout(()=>{const el=document.getElementById(id);if(el)el.classList.add('on');},d));
+  });
+
+  // WASH OS burst dim + scatter
+  if(i===8){
+    act.push(setTimeout(()=>{const b=document.getElementById('z9burst');if(b)b.classList.add('dim');},5800));
+    act.push(setTimeout(()=>{
+      const sc=document.getElementById('sc9');
+      for(let j=0;j<35;j++){
+        const p=document.createElement('div');p.className='scatter';p.style.left='50%';p.style.top='50%';
+        const ang=Math.random()*Math.PI*2,dist=80+Math.random()*280;
+        const dx=Math.cos(ang)*dist,dy=Math.sin(ang)*dist,spd=2+Math.random()*2;
+        p.style.transition=`all ${spd}s cubic-bezier(.16,1,.3,1)`;
+        sc.appendChild(p);
+        requestAnimationFrame(()=>{p.style.opacity='.7';p.style.transform=`translate(${dx}px,${dy}px)`;
+          setTimeout(()=>{p.style.opacity='0';},spd*550);
+          setTimeout(()=>{p.remove();},spd*1200);
+        });
       }
-    }
+    },1700));
+  }
+}
 
-    [0,1,4,5,10].forEach(idx=>mistFor(slides[idx],20));
+function nx(){show((cur+1)%T);}
+function pv(){show((cur-1+T)%T);}
+function go(){stop();play=true;document.getElementById('bA').textContent='II';tmr=setTimeout(()=>{nx();go();},dur[cur]);}
+function stop(){play=false;document.getElementById('bA').textContent='▸';if(tmr)clearTimeout(tmr);}
 
-    function render(){
-      slides.forEach(s=>s.classList.remove('active'));
-      slides[i].classList.add('active');
-      document.getElementById('count').textContent=String(i+1).padStart(2,'0')+' / '+String(total).padStart(2,'0');
-      document.getElementById('bar').style.width=((i+1)/total*100)+'%';
-    }
+document.getElementById('bN').onclick=()=>{stop();nx();};
+document.getElementById('bP').onclick=()=>{stop();pv();};
+document.getElementById('bA').onclick=()=>{play?stop():go();};
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();stop();nx();}
+  if(e.key==='ArrowLeft'){stop();pv();}
+});
 
-    function next(){ i=(i+1)%total; render(); }
-    function prev(){ i=(i-1+total)%total; render(); }
-
-    function stop(){auto=false;document.getElementById('play').textContent='▸'; if(timer)clearTimeout(timer)}
-    function run(){
-      stop(); auto=true; document.getElementById('play').textContent='II';
-      timer=setTimeout(()=>{next(); run();}, durations[i]);
-    }
-
-    document.getElementById('next').onclick=()=>{next(); if(auto)run();};
-    document.getElementById('prev').onclick=()=>{prev(); if(auto)run();};
-    document.getElementById('play').onclick=()=>{auto?stop():run();};
-    window.addEventListener('keydown',e=>{
-      if(e.key==='ArrowRight'){next(); if(auto)run();}
-      if(e.key==='ArrowLeft'){prev(); if(auto)run();}
-      if(e.key===' '){e.preventDefault(); auto?stop():run();}
-    });
-
-    render();
-    run();
-  </script>
+show(0);go();
+</script>
 </body>
 </html>
