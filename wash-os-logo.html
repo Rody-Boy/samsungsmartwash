@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Samsung Smart Wash — Water Transform</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: #03050B;
+    overflow: hidden;
+  }
+  body { display:block; }
+  canvas {
+    display:block;
+    width:100vw;
+    height:100vh;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const cvs = document.getElementById('c');
+const ctx = cvs.getContext('2d');
+
+let W=0, H=0, CX=0, DCY=0, DR=0, BASE=0;
+const PI2 = Math.PI * 2;
+const DUR = 22;
+let t0 = null;
+
+const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+const sm = (e0,e1,x)=>{ const t = clamp((x-e0)/(e1-e0),0,1); return t*t*(3-2*t); };
+const lerp = (a,b,t)=>a+(b-a)*t;
+
+const ENV = {
+  water:[0,0.055,0.37,0.56],
+  vortex:[0.28,0.47,0.64,0.79],
+  drum:[0.60,0.80,1.00,1.00],
+  logo:[0.87,1.00,1.00,1.00],
+};
+function env(key,p){
+  const [a,b,c,d]=ENV[key];
+  if(p<=a) return 0;
+  if(p<=b) return sm(a,b,p);
+  if(p<=c) return 1;
+  if(p<=d) return 1-sm(c,d,p);
+  return 0;
+}
+
+function setSize(){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth;
+  H = window.innerHeight;
+  cvs.width = Math.floor(W * dpr);
+  cvs.height = Math.floor(H * dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+
+  BASE = Math.min(W, H, 860);
+  CX = W / 2;
+  DCY = H * 0.46;
+  DR = BASE * 0.305;
+}
+
+function drawBG(p){
+  const m = sm(0.08,0.65,p);
+  const g = ctx.createRadialGradient(CX, DCY*1.05, 0, CX, DCY*1.15, Math.max(W,H)*0.88);
+  g.addColorStop(0, `rgba(${lerp(14,9,m)}, ${lerp(32,19,m)}, ${lerp(80,50,m)}, 1)`);
+  g.addColorStop(0.5, `rgba(5, ${lerp(15,9,m)}, ${lerp(36,21,m)}, 1)`);
+  g.addColorStop(1, 'rgba(2, 4, 9, 1)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,W,H);
+}
+
+function drawAmbient(sec,p){
+  const str = sm(0.20,0.68,p);
+  if(str<0.005) return;
+  const pls=0.82+0.18*Math.sin(sec*1.38);
+  const R = BASE*lerp(0.18,0.52,sm(0.20,0.75,p));
+  const g=ctx.createRadialGradient(CX,DCY,0,CX,DCY,R);
+  g.addColorStop(0,`rgba(0,92,198,${str*0.24*pls})`);
+  g.addColorStop(0.5,'rgba(0,52,135,0.07)');
+  g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.arc(CX,DCY,R,0,PI2);ctx.fill();
+}
+
+function drawWater(sec,p){
+  const alpha = env('water', p);
+  if(alpha<0.005) return;
+  const ampS = sm(0,0.10,p)*(1+1.6*sm(0.10,0.33,p));
+  const LAYERS=7;
+
+  for(let li=0; li<LAYERS; li++){
+    const lt = li/(LAYERS-1);
+    const yBase = lerp(H*0.46, H*0.72, lt);
+    const freq = 0.0045 + lt*0.0023;
+    const spd = 0.76 + lt*0.31;
+    const amp = 16*ampS*(1-lt*0.27);
+    const a = alpha*lerp(0.13,0.52,lt);
+
+    ctx.beginPath();ctx.moveTo(0,H);
+    for(let x=0;x<=W;x+=3){
+      const y = yBase
+        + amp*Math.sin(x*freq + sec*spd)
+        + amp*0.43*Math.sin(x*freq*1.66 - sec*spd*0.74 + li)
+        + amp*0.18*Math.sin(x*freq*2.47 + sec*spd*1.09 + li*1.6);
+      ctx.lineTo(x,y);
+    }
+    ctx.lineTo(W,H);ctx.closePath();
+
+    const gR=Math.round(lerp(8,5,lt));
+    const gG=Math.round(lerp(108,42,lt));
+    const gB=Math.round(lerp(205,122,lt));
+    const g=ctx.createLinearGradient(0,yBase-amp*2,0,H);
+    g.addColorStop(0,`rgba(${gR},${gG},${gB},0)`);
+    g.addColorStop(0.09,`rgba(${gR},${gG},${gB},${a*0.42})`);
+    g.addColorStop(1,`rgba(${gR},${gG},${gB},${a})`);
+    ctx.fillStyle=g;ctx.fill();
+  }
+}
+
+function drawVortex(sec,p){
+  const alpha=env('vortex',p);
+  if(alpha<0.005) return;
+
+  const vp=sm(0.28,0.68,p);
+  const squeeze=lerp(0.48,1.0,vp);
+  const rotSpd=lerp(0.88,2.9,vp);
+  const baseR=lerp(BASE*0.12, BASE*0.385, vp);
+  const R=lerp(baseR, DR, sm(0.57,0.73,p));
+
+  const RINGS=15;
+  for(let ri=0;ri<RINGS;ri++){
+    const rt=ri/(RINGS-1);
+    const rR=R*lerp(0.09,1.0,rt);
+    const rRt=sec*rotSpd*lerp(2.3,0.44,rt);
+    const rA=alpha*lerp(0.98,0.06,rt);
+    const lw=lerp(3.2,0.45,rt);
+    const spi=lerp(0.068,0.011,rt);
+    if(rA<0.008) continue;
+
+    ctx.beginPath();
+    const N=180;
+    for(let i=0;i<=N;i++){
+      const at=i/N;
+      const ang=at*PI2+rRt;
+      const r=rR*(1-spi*Math.sin(at*PI2*2));
+      const x=CX+r*Math.cos(ang);
+      const y=DCY+r*Math.sin(ang)*squeeze;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    const cg=Math.round(lerp(148,210,rt));
+    const cb=Math.round(lerp(200,255,rt));
+    ctx.strokeStyle=`rgba(0,${cg},${cb},${rA})`;
+    ctx.lineWidth=lw;
+    ctx.stroke();
+  }
+}
+
+function drawDrum(sec,p){
+  const da=env('drum',p);
+  if(da<0.005) return;
+  const dp=sm(0.60,0.90,p);
+  const R=DR;
+
+  ctx.save();
+  ctx.globalAlpha=da;
+
+  const og=ctx.createRadialGradient(CX,DCY,R*0.78,CX,DCY,R+70);
+  og.addColorStop(0,`rgba(0,96,208,${0.32*dp})`);
+  og.addColorStop(0.42,'rgba(0,62,155,0.09)');
+  og.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=og;
+  ctx.beginPath();ctx.arc(CX,DCY,R+70,0,PI2);ctx.fill();
+
+  const ff=ctx.createRadialGradient(CX-R*0.17,DCY-R*0.19,R*0.07,CX,DCY,R);
+  ff.addColorStop(0,'#0C2252');ff.addColorStop(0.42,'#07102A');ff.addColorStop(1,'#030810');
+  ctx.beginPath();ctx.arc(CX,DCY,R,0,PI2);ctx.fillStyle=ff;ctx.fill();
+
+  ctx.beginPath();ctx.arc(CX,DCY,R,0,PI2);
+  const rim=ctx.createLinearGradient(CX-R,DCY-R,CX+R,DCY+R);
+  rim.addColorStop(0,'#0A1E50');rim.addColorStop(0.42,'#2C5EAE');rim.addColorStop(0.58,'#3C76CE');rim.addColorStop(1,'#0A1E50');
+  ctx.strokeStyle=rim;ctx.lineWidth=8;ctx.stroke();
+
+  ctx.beginPath();ctx.arc(CX,DCY,R-5.5,0,PI2);
+  ctx.strokeStyle=`rgba(0,200,255,${0.40*dp})`;ctx.lineWidth=1.2;ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawLogo(p){
+  const la=env('logo',p);
+  if(la<0.005) return;
+  const y0=DCY+DR*1.115;
+
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+
+  ctx.save();
+  ctx.globalAlpha=la*0.80;
+  ctx.font=`400 ${BASE*0.021}px 'Helvetica Neue', Helvetica, Arial, sans-serif`;
+  ctx.fillStyle='rgba(86,138,200,1)';
+  ctx.fillText('SAMSUNG',CX,y0);
+  ctx.restore();
+
+  ctx.save();
+  ctx.globalAlpha=la*0.96;
+  ctx.font=`800 ${BASE*0.052}px 'Helvetica Neue', Helvetica, Arial, sans-serif`;
+  ctx.fillStyle='rgba(212,230,255,1)';
+  ctx.fillText('WASH OS',CX,y0+BASE*0.07);
+  ctx.restore();
+
+  ctx.save();
+  ctx.globalAlpha=la*0.48;
+  ctx.font=`400 ${BASE*0.018}px 'Helvetica Neue', Helvetica, Arial, sans-serif`;
+  ctx.fillStyle='rgba(0,200,255,1)';
+  ctx.fillText('POWERED BY WASH OS',CX,y0+BASE*0.13);
+  ctx.restore();
+}
+
+function frame(ts){
+  if(!t0) t0=ts;
+  const sec=(ts-t0)/1000;
+  const p=Math.min(sec/DUR,1.0);
+  ctx.clearRect(0,0,W,H);
+  drawBG(p);
+  drawAmbient(sec,p);
+  drawWater(sec,p);
+  drawVortex(sec,p);
+  drawDrum(sec,p);
+  drawLogo(p);
+
+  if(p<1) requestAnimationFrame(frame);
+  else setTimeout(()=>{t0=null; requestAnimationFrame(frame);}, 3000);
+}
+
+window.addEventListener('resize', setSize);
+setSize();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
