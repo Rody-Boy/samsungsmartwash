@@ -7,12 +7,17 @@
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
-    width: 100%; height: 100%;
+    width: 100%;
+    height: 100%;
     background: #03050B;
-    display: flex; align-items: center; justify-content: center;
     overflow: hidden;
   }
-  canvas { display: block; }
+  body { display:block; }
+  canvas {
+    display:block;
+    width:100vw;
+    height:100vh;
+  }
 </style>
 </head>
 <body>
@@ -21,487 +26,220 @@
 const cvs = document.getElementById('c');
 const ctx = cvs.getContext('2d');
 
-const S   = Math.min(window.innerWidth, window.innerHeight, 860);
-cvs.width = cvs.height = S;
-const W = S, H = S;
-const CX   = W / 2;
-const DCY  = H * 0.454;         // drum / vortex center (slightly above mid)
-const DR   = W * 0.305;         // drum radius
-const PI2  = Math.PI * 2;
-const DUR  = 22;                 // total animation seconds
-
+let W=0, H=0, CX=0, DCY=0, DR=0, BASE=0;
+const PI2 = Math.PI * 2;
+const DUR = 22;
 let t0 = null;
 
-/* ─────────────────────── helpers ─────────────────────── */
-const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-const sm    = (e0, e1, x) => { const t = clamp((x-e0)/(e1-e0),0,1); return t*t*(3-2*t); };
-const lerp  = (a, b, t)   => a + (b-a)*t;
+const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+const sm = (e0,e1,x)=>{ const t = clamp((x-e0)/(e1-e0),0,1); return t*t*(3-2*t); };
+const lerp = (a,b,t)=>a+(b-a)*t;
 
-/* phase envelopes  [fadeInStart, fullOnStart, fullOnEnd, fadeOutEnd] as fraction of DUR */
 const ENV = {
-  water:  [0,    0.055, 0.37, 0.56],
-  vortex: [0.28, 0.47,  0.64, 0.79],
-  drum:   [0.60, 0.80,  1.00, 1.00],
-  logo:   [0.87, 1.00,  1.00, 1.00],
+  water:[0,0.055,0.37,0.56],
+  vortex:[0.28,0.47,0.64,0.79],
+  drum:[0.60,0.80,1.00,1.00],
+  logo:[0.87,1.00,1.00,1.00],
 };
-function env(key, p) {
-  const [a,b,c,d] = ENV[key];
-  if (p <= a) return 0;
-  if (p <= b) return sm(a,b,p);
-  if (p <= c) return 1;
-  if (p <= d) return 1 - sm(c,d,p);
+function env(key,p){
+  const [a,b,c,d]=ENV[key];
+  if(p<=a) return 0;
+  if(p<=b) return sm(a,b,p);
+  if(p<=c) return 1;
+  if(p<=d) return 1-sm(c,d,p);
   return 0;
 }
 
-/* ─────────────────────── BG ─────────────────────── */
-function drawBG(p) {
-  const m = sm(0.08, 0.65, p);
-  const g = ctx.createRadialGradient(CX, DCY*1.05, 0, CX, DCY*1.15, W*0.88);
-  g.addColorStop(0,   `rgba(${lerp(14,9,m)}, ${lerp(32,19,m)}, ${lerp(80,50,m)}, 1)`);
+function setSize(){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth;
+  H = window.innerHeight;
+  cvs.width = Math.floor(W * dpr);
+  cvs.height = Math.floor(H * dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+
+  BASE = Math.min(W, H, 860);
+  CX = W / 2;
+  DCY = H * 0.46;
+  DR = BASE * 0.305;
+}
+
+function drawBG(p){
+  const m = sm(0.08,0.65,p);
+  const g = ctx.createRadialGradient(CX, DCY*1.05, 0, CX, DCY*1.15, Math.max(W,H)*0.88);
+  g.addColorStop(0, `rgba(${lerp(14,9,m)}, ${lerp(32,19,m)}, ${lerp(80,50,m)}, 1)`);
   g.addColorStop(0.5, `rgba(5, ${lerp(15,9,m)}, ${lerp(36,21,m)}, 1)`);
-  g.addColorStop(1,   'rgba(2, 4, 9, 1)');
+  g.addColorStop(1, 'rgba(2, 4, 9, 1)');
   ctx.fillStyle = g;
-  ctx.fillRect(0, 0, W, H);
+  ctx.fillRect(0,0,W,H);
 }
 
-/* ─────────────────────── AMBIENT GLOW ─────────────────────── */
-function drawAmbient(sec, p) {
-  const str = sm(0.20, 0.68, p);
-  if (str < 0.005) return;
-  const pls = 0.82 + 0.18 * Math.sin(sec * 1.38);
-  const R   = W * lerp(0.18, 0.52, sm(0.20, 0.75, p));
-  const g   = ctx.createRadialGradient(CX, DCY, 0, CX, DCY, R);
-  g.addColorStop(0, `rgba(0, 92, 198, ${str * 0.24 * pls})`);
-  g.addColorStop(0.5,'rgba(0, 52, 135, 0.07)');
-  g.addColorStop(1,  'rgba(0,0,0,0)');
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.arc(CX, DCY, R, 0, PI2); ctx.fill();
+function drawAmbient(sec,p){
+  const str = sm(0.20,0.68,p);
+  if(str<0.005) return;
+  const pls=0.82+0.18*Math.sin(sec*1.38);
+  const R = BASE*lerp(0.18,0.52,sm(0.20,0.75,p));
+  const g=ctx.createRadialGradient(CX,DCY,0,CX,DCY,R);
+  g.addColorStop(0,`rgba(0,92,198,${str*0.24*pls})`);
+  g.addColorStop(0.5,'rgba(0,52,135,0.07)');
+  g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.arc(CX,DCY,R,0,PI2);ctx.fill();
 }
 
-/* ─────────────────────── WATER ─────────────────────── */
-function drawWater(sec, p) {
+function drawWater(sec,p){
   const alpha = env('water', p);
-  if (alpha < 0.005) return;
+  if(alpha<0.005) return;
+  const ampS = sm(0,0.10,p)*(1+1.6*sm(0.10,0.33,p));
+  const LAYERS=7;
 
-  /* amplitude: build slowly, then swell before vanishing */
-  const ampS = sm(0, 0.10, p) * (1 + 1.6*sm(0.10, 0.33, p));
-  const LAYERS = 7;
+  for(let li=0; li<LAYERS; li++){
+    const lt = li/(LAYERS-1);
+    const yBase = lerp(H*0.46, H*0.72, lt);
+    const freq = 0.0045 + lt*0.0023;
+    const spd = 0.76 + lt*0.31;
+    const amp = 16*ampS*(1-lt*0.27);
+    const a = alpha*lerp(0.13,0.52,lt);
 
-  for (let li = 0; li < LAYERS; li++) {
-    const lt    = li / (LAYERS-1);
-    const yBase = lerp(H*0.46, H*0.68, lt);
-    const freq  = 0.0050 + lt*0.0029;
-    const spd   = 0.76 + lt*0.31;
-    const amp   = 18 * ampS * (1 - lt*0.27);
-    const a     = alpha * lerp(0.13, 0.52, lt);
-
-    ctx.beginPath();
-    ctx.moveTo(0, H);
-    for (let x = 0; x <= W; x += 3) {
+    ctx.beginPath();ctx.moveTo(0,H);
+    for(let x=0;x<=W;x+=3){
       const y = yBase
-        + amp * Math.sin(x*freq + sec*spd)
-        + amp * 0.43 * Math.sin(x*freq*1.66 - sec*spd*0.74 + li)
-        + amp * 0.18 * Math.sin(x*freq*2.47 + sec*spd*1.09 + li*1.6);
-      ctx.lineTo(x, y);
+        + amp*Math.sin(x*freq + sec*spd)
+        + amp*0.43*Math.sin(x*freq*1.66 - sec*spd*0.74 + li)
+        + amp*0.18*Math.sin(x*freq*2.47 + sec*spd*1.09 + li*1.6);
+      ctx.lineTo(x,y);
     }
-    ctx.lineTo(W, H); ctx.closePath();
+    ctx.lineTo(W,H);ctx.closePath();
 
-    const gR = Math.round(lerp(8,5,lt));
-    const gG = Math.round(lerp(108,42,lt));
-    const gB = Math.round(lerp(205,122,lt));
-    const g  = ctx.createLinearGradient(0, yBase-amp*2, 0, H);
-    g.addColorStop(0,    `rgba(${gR},${gG},${gB},0)`);
-    g.addColorStop(0.09, `rgba(${gR},${gG},${gB},${a*0.42})`);
-    g.addColorStop(1,    `rgba(${gR},${gG},${gB},${a})`);
-    ctx.fillStyle = g; ctx.fill();
+    const gR=Math.round(lerp(8,5,lt));
+    const gG=Math.round(lerp(108,42,lt));
+    const gB=Math.round(lerp(205,122,lt));
+    const g=ctx.createLinearGradient(0,yBase-amp*2,0,H);
+    g.addColorStop(0,`rgba(${gR},${gG},${gB},0)`);
+    g.addColorStop(0.09,`rgba(${gR},${gG},${gB},${a*0.42})`);
+    g.addColorStop(1,`rgba(${gR},${gG},${gB},${a})`);
+    ctx.fillStyle=g;ctx.fill();
   }
-
-  /* surface shimmer / sparkles */
-  const f0=0.0050, s0=0.76, a0=18*ampS;
-  const yB0 = H*0.46;
-  for (let i = 0; i < 34; i++) {
-    const x = ((i*81.3 + sec*54) % (W-24)) + 12;
-    const y = yB0
-      + a0*Math.sin(x*f0 + sec*s0)
-      + a0*0.43*Math.sin(x*f0*1.66 - sec*s0*0.74);
-    const br = (Math.sin(sec*3.1 + i*2.4)+1)/2;
-    const sz = 1.2 + 2.4*br;
-    ctx.save();
-    ctx.globalAlpha = br * 0.54 * alpha;
-    ctx.beginPath(); ctx.arc(x, y-sz*0.35, sz, 0, PI2);
-    ctx.fillStyle = '#C3F4FF'; ctx.fill();
-    ctx.restore();
-  }
-
-  /* subtle foam lines at wave crests */
-  ctx.save();
-  ctx.globalAlpha = alpha * 0.12;
-  for (let i = 0; i < 3; i++) {
-    const phase = i * W/3;
-    ctx.beginPath();
-    for (let x = 0; x <= W; x += 4) {
-      const y = yB0
-        + a0*Math.sin(x*f0 + sec*s0 + i*2.1)
-        + a0*0.43*Math.sin(x*f0*1.66 - sec*s0*0.74 + i);
-      x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    }
-    ctx.strokeStyle = '#A8E8FF';
-    ctx.lineWidth = 1.2;
-    ctx.stroke();
-  }
-  ctx.restore();
 }
 
-/* ─────────────────────── VORTEX ─────────────────────── */
-function drawVortex(sec, p) {
-  const alpha = env('vortex', p);
-  if (alpha < 0.005) return;
+function drawVortex(sec,p){
+  const alpha=env('vortex',p);
+  if(alpha<0.005) return;
 
-  const vp      = sm(0.28, 0.68, p);              // tightness 0→1
-  const squeeze = lerp(0.48, 1.0, vp);             // perspective → top-down
-  const rotSpd  = lerp(0.88, 2.9, vp);
+  const vp=sm(0.28,0.68,p);
+  const squeeze=lerp(0.48,1.0,vp);
+  const rotSpd=lerp(0.88,2.9,vp);
+  const baseR=lerp(BASE*0.12, BASE*0.385, vp);
+  const R=lerp(baseR, DR, sm(0.57,0.73,p));
 
-  /* vortex R: grows to 0.385W, then converges to DR as drum appears */
-  const baseR = lerp(W*0.12, W*0.385, vp);
-  const R     = lerp(baseR, DR, sm(0.57, 0.73, p));
+  const RINGS=15;
+  for(let ri=0;ri<RINGS;ri++){
+    const rt=ri/(RINGS-1);
+    const rR=R*lerp(0.09,1.0,rt);
+    const rRt=sec*rotSpd*lerp(2.3,0.44,rt);
+    const rA=alpha*lerp(0.98,0.06,rt);
+    const lw=lerp(3.2,0.45,rt);
+    const spi=lerp(0.068,0.011,rt);
+    if(rA<0.008) continue;
 
-  /* ── Concentric spiral rings ── */
-  const RINGS = 15;
-  for (let ri = 0; ri < RINGS; ri++) {
-    const rt  = ri / (RINGS-1);
-    const rR  = R * lerp(0.09, 1.0, rt);
-    const rRt = sec * rotSpd * lerp(2.3, 0.44, rt); // inner faster
-    const rA  = alpha * lerp(0.98, 0.06, rt);
-    const lw  = lerp(3.2, 0.45, rt);
-    const spi = lerp(0.068, 0.011, rt);             // slight spiral
-
-    if (rA < 0.008) continue;
     ctx.beginPath();
-    const N = 180;
-    for (let i = 0; i <= N; i++) {
-      const at  = i / N;
-      const ang = at*PI2 + rRt;
-      const r   = rR * (1 - spi*Math.sin(at*PI2*2));
-      const x   = CX + r*Math.cos(ang);
-      const y   = DCY + r*Math.sin(ang)*squeeze;
-      i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    const N=180;
+    for(let i=0;i<=N;i++){
+      const at=i/N;
+      const ang=at*PI2+rRt;
+      const r=rR*(1-spi*Math.sin(at*PI2*2));
+      const x=CX+r*Math.cos(ang);
+      const y=DCY+r*Math.sin(ang)*squeeze;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
     }
     ctx.closePath();
-    const cg = Math.round(lerp(148, 210, rt));
-    const cb = Math.round(lerp(200, 255, rt));
-    ctx.strokeStyle = `rgba(0,${cg},${cb},${rA})`;
-    ctx.lineWidth   = lw;
+    const cg=Math.round(lerp(148,210,rt));
+    const cb=Math.round(lerp(200,255,rt));
+    ctx.strokeStyle=`rgba(0,${cg},${cb},${rA})`;
+    ctx.lineWidth=lw;
     ctx.stroke();
   }
-
-  /* ── Orbiting water particles ── */
-  const pRot = sec * rotSpd * 0.50;
-  for (let i = 0; i < 60; i++) {
-    const at  = i / 60;
-    const pR  = R * (1.04 + 0.20*((Math.sin(at*PI2*3.8)+1)/2));
-    const ang = at*PI2 + pRot;
-    const px  = CX + pR*Math.cos(ang);
-    const py  = DCY + pR*Math.sin(ang)*squeeze;
-    const pa  = alpha * lerp(0.82,0.09,at) * (0.42+0.58*Math.sin(sec*2.4+i*1.8));
-    if (pa < 0.018) continue;
-    ctx.save();
-    ctx.globalAlpha = pa;
-    ctx.beginPath(); ctx.arc(px, py, lerp(3.0,0.7,at), 0, PI2);
-    ctx.fillStyle = '#00B8F5'; ctx.fill();
-    ctx.restore();
-  }
-
-  /* ── Dark center funnel ── */
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  const fg = ctx.createRadialGradient(CX, DCY, 0, CX, DCY, R*0.42);
-  fg.addColorStop(0,   'rgba(0,2,10,0.97)');
-  fg.addColorStop(0.72,'rgba(0,6,20,0.64)');
-  fg.addColorStop(1,   'rgba(0,0,0,0)');
-  ctx.fillStyle = fg;
-  ctx.beginPath();
-  ctx.ellipse(CX, DCY, R*0.42, R*0.42*squeeze, 0, 0, PI2);
-  ctx.fill();
-  ctx.restore();
 }
 
-/* ─────────────────────── DRUM ─────────────────────── */
-function drawDrum(sec, p) {
-  const da = env('drum', p);
-  if (da < 0.005) return;
+function drawDrum(sec,p){
+  const da=env('drum',p);
+  if(da<0.005) return;
+  const dp=sm(0.60,0.90,p);
+  const R=DR;
 
-  const dp  = sm(0.60, 0.90, p);   // material solidity
-  const R   = DR;
-  const rot = sec * 1.06;
-
-  /* BLOCK 1 ── outer halo + face + rim ── */
   ctx.save();
-  ctx.globalAlpha = da;
+  ctx.globalAlpha=da;
 
-  // outer ambient halo
-  const og = ctx.createRadialGradient(CX, DCY, R*0.78, CX, DCY, R+70);
-  og.addColorStop(0, `rgba(0,96,208,${0.32*dp})`);
+  const og=ctx.createRadialGradient(CX,DCY,R*0.78,CX,DCY,R+70);
+  og.addColorStop(0,`rgba(0,96,208,${0.32*dp})`);
   og.addColorStop(0.42,'rgba(0,62,155,0.09)');
-  og.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = og;
-  ctx.beginPath(); ctx.arc(CX, DCY, R+70, 0, PI2); ctx.fill();
+  og.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=og;
+  ctx.beginPath();ctx.arc(CX,DCY,R+70,0,PI2);ctx.fill();
 
-  // drum face fill (deep navy)
-  const ff = ctx.createRadialGradient(CX-R*0.17, DCY-R*0.19, R*0.07, CX, DCY, R);
-  ff.addColorStop(0, '#0C2252');
-  ff.addColorStop(0.42,'#07102A');
-  ff.addColorStop(1, '#030810');
-  ctx.beginPath(); ctx.arc(CX, DCY, R, 0, PI2);
-  ctx.fillStyle = ff; ctx.fill();
+  const ff=ctx.createRadialGradient(CX-R*0.17,DCY-R*0.19,R*0.07,CX,DCY,R);
+  ff.addColorStop(0,'#0C2252');ff.addColorStop(0.42,'#07102A');ff.addColorStop(1,'#030810');
+  ctx.beginPath();ctx.arc(CX,DCY,R,0,PI2);ctx.fillStyle=ff;ctx.fill();
 
-  // metallic outer rim — gradient sweep
-  ctx.beginPath(); ctx.arc(CX, DCY, R, 0, PI2);
-  const rim = ctx.createLinearGradient(CX-R, DCY-R, CX+R, DCY+R);
-  rim.addColorStop(0,    '#0A1E50');
-  rim.addColorStop(0.20, '#182E70');
-  rim.addColorStop(0.42, '#2C5EAE');
-  rim.addColorStop(0.58, '#3C76CE');
-  rim.addColorStop(0.78, '#182E70');
-  rim.addColorStop(1,    '#0A1E50');
-  ctx.strokeStyle = rim; ctx.lineWidth = 8; ctx.stroke();
+  ctx.beginPath();ctx.arc(CX,DCY,R,0,PI2);
+  const rim=ctx.createLinearGradient(CX-R,DCY-R,CX+R,DCY+R);
+  rim.addColorStop(0,'#0A1E50');rim.addColorStop(0.42,'#2C5EAE');rim.addColorStop(0.58,'#3C76CE');rim.addColorStop(1,'#0A1E50');
+  ctx.strokeStyle=rim;ctx.lineWidth=8;ctx.stroke();
 
-  // cyan inner rim
-  ctx.beginPath(); ctx.arc(CX, DCY, R-5.5, 0, PI2);
-  ctx.strokeStyle = `rgba(0,200,255,${0.40*dp})`;
-  ctx.lineWidth = 1.2; ctx.stroke();
+  ctx.beginPath();ctx.arc(CX,DCY,R-5.5,0,PI2);
+  ctx.strokeStyle=`rgba(0,200,255,${0.40*dp})`;ctx.lineWidth=1.2;ctx.stroke();
 
-  // inner geometry rings
-  for (const [rr, a] of [[0.880, 0.52],[0.764, 0.32]]) {
-    ctx.beginPath(); ctx.arc(CX, DCY, R*rr, 0, PI2);
-    ctx.strokeStyle = `rgba(22,52,128,${a*dp})`;
-    ctx.lineWidth = 1.0; ctx.stroke();
-  }
-
-  ctx.restore();
-
-  /* BLOCK 2 ── residual water rings (clipped to drum face) ── */
-  const wr = 1 - sm(0.73, 0.93, p);
-  if (wr > 0.015) {
-    ctx.save();
-    ctx.globalAlpha = da * wr;
-    ctx.beginPath(); ctx.arc(CX, DCY, R*0.855, 0, PI2); ctx.clip();
-    for (let ri = 1; ri <= 9; ri++) {
-      const rr = ri * R * 0.106 + 7*Math.sin(sec*2.7 + ri*1.28);
-      if (rr < 5) continue;
-      ctx.beginPath(); ctx.arc(CX, DCY, rr, 0, PI2);
-      ctx.strokeStyle = `rgba(0,172,238,${0.40-ri*0.040})`;
-      ctx.lineWidth = 1.7; ctx.stroke();
-    }
-    ctx.restore();
-  }
-
-  /* BLOCK 3 ── rotating perforations ── */
-  const perfA = sm(0.71, 0.90, p);
-  if (perfA > 0.01) {
-    ctx.save();
-    ctx.globalAlpha = da * perfA;
-    const perf = [
-      { r: R*0.674, n: 28, sz: 3.9 },
-      { r: R*0.535, n: 22, sz: 3.3 },
-      { r: R*0.390, n: 14, sz: 2.6 },
-    ];
-    for (const rg of perf) {
-      for (let i = 0; i < rg.n; i++) {
-        const ang = (i/rg.n)*PI2 + rot;
-        const px  = CX + rg.r*Math.cos(ang);
-        const py  = DCY + rg.r*Math.sin(ang);
-        // hole (dark fill)
-        ctx.beginPath(); ctx.arc(px, py, rg.sz, 0, PI2);
-        ctx.fillStyle = 'rgba(1,4,13,0.93)'; ctx.fill();
-        // hole rim glow
-        ctx.beginPath(); ctx.arc(px, py, rg.sz, 0, PI2);
-        ctx.strokeStyle = 'rgba(18,70,158,0.55)';
-        ctx.lineWidth = 0.6; ctx.stroke();
-      }
-    }
-    ctx.restore();
-  }
-
-  /* BLOCK 4 ── center porthole ── */
-  ctx.save();
-  ctx.globalAlpha = da;
-
-  const por  = R * 0.268;
-  const pg   = ctx.createRadialGradient(CX-por*0.22, DCY-por*0.22, 0, CX, DCY, por);
-  pg.addColorStop(0, '#0D3078');
-  pg.addColorStop(0.55,'#060F32');
-  pg.addColorStop(1, '#020810');
-  ctx.beginPath(); ctx.arc(CX, DCY, por, 0, PI2);
-  ctx.fillStyle = pg; ctx.fill();
-
-  // porthole rim
-  ctx.beginPath(); ctx.arc(CX, DCY, por, 0, PI2);
-  ctx.strokeStyle = `rgba(0,138,222,${0.68*dp})`;
-  ctx.lineWidth = 1.8; ctx.stroke();
-
-  ctx.beginPath(); ctx.arc(CX, DCY, por*0.83, 0, PI2);
-  ctx.strokeStyle = `rgba(0,80,162,${0.26*dp})`;
-  ctx.lineWidth = 0.9; ctx.stroke();
-
-  // porthole highlight crescent
-  const hlG = ctx.createRadialGradient(
-    CX-por*0.30, DCY-por*0.30, 0,
-    CX-por*0.30, DCY-por*0.30, por*0.25
-  );
-  hlG.addColorStop(0, `rgba(158,218,255,${0.30*dp})`);
-  hlG.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.beginPath(); ctx.arc(CX-por*0.30, DCY-por*0.30, por*0.25, 0, PI2);
-  ctx.fillStyle = hlG; ctx.fill();
-
-  ctx.restore();
-
-  /* BLOCK 5 ── cyan accent arc (traces in like a laser) ── */
-  ctx.save();
-  ctx.globalAlpha = da;
-  const arcProg = sm(0.75, 0.87, p);
-  if (arcProg > 0.005) {
-    const arcS = -Math.PI * 0.50;   // 12 o'clock
-    const arcE =  Math.PI * 0.12;   // ~2 o'clock
-    const arcC = lerp(arcS, arcE, arcProg);
-
-    ctx.beginPath();
-    ctx.arc(CX, DCY, R+0.5, arcS, arcC);
-    ctx.strokeStyle = '#00C8FF';
-    ctx.lineWidth   = 3.8;
-    ctx.lineCap     = 'round';
-    ctx.stroke();
-
-    // bright traveling tip
-    if (arcProg < 0.97) {
-      const tipX = CX + (R+0.5)*Math.cos(arcC);
-      const tipY = DCY + (R+0.5)*Math.sin(arcC);
-      const flash = sm(0, 0.55, arcProg) * (1 - sm(0.88, 0.97, arcProg)) + 0.12;
-      const tg = ctx.createRadialGradient(tipX, tipY, 0, tipX, tipY, 18);
-      tg.addColorStop(0, `rgba(0,255,255,${0.80*flash})`);
-      tg.addColorStop(0.35,'rgba(0,210,255,0.35)');
-      tg.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = tg;
-      ctx.beginPath(); ctx.arc(tipX, tipY, 18, 0, PI2); ctx.fill();
-    }
-  }
-  ctx.restore();
-
-  /* BLOCK 6 ── network node dots (logo detail) ── */
-  const nodeA = sm(0.82, 0.97, p) * da;
-  if (nodeA > 0.008) {
-    ctx.save();
-    ctx.globalAlpha = nodeA;
-
-    // 12 o'clock
-    ctx.beginPath(); ctx.arc(CX, DCY-R, 4.8, 0, PI2);
-    ctx.fillStyle = '#00C8FF'; ctx.fill();
-
-    // ~1:30
-    const a2 = -Math.PI/5.8;
-    ctx.beginPath(); ctx.arc(CX+R*Math.cos(a2), DCY+R*Math.sin(a2), 3.8, 0, PI2);
-    ctx.fillStyle = '#1662FF'; ctx.fill();
-
-    // ~7:30
-    const a3 = Math.PI*0.72;
-    ctx.beginPath(); ctx.arc(CX+R*Math.cos(a3), DCY+R*Math.sin(a3), 3.8, 0, PI2);
-    ctx.fillStyle = '#1662FF'; ctx.fill();
-
-    // hairline connectors from center to nodes
-    const nodeAlpha = sm(0.88, 0.97, p) * da;
-    ctx.globalAlpha = nodeAlpha * 0.22;
-    ctx.strokeStyle = '#00C8FF'; ctx.lineWidth = 0.5;
-    [[CX, DCY-R], [CX+R*Math.cos(a2), DCY+R*Math.sin(a2)],
-     [CX+R*Math.cos(a3), DCY+R*Math.sin(a3)]].forEach(([nx,ny]) => {
-      ctx.beginPath(); ctx.moveTo(CX, DCY); ctx.lineTo(nx, ny); ctx.stroke();
-    });
-    // center dot
-    ctx.globalAlpha = nodeA;
-    ctx.beginPath(); ctx.arc(CX, DCY, 3.2, 0, PI2);
-    ctx.strokeStyle = `rgba(0,200,255,0.6)`; ctx.lineWidth = 0.7; ctx.stroke();
-    ctx.beginPath(); ctx.arc(CX, DCY, 1.6, 0, PI2);
-    ctx.fillStyle = '#00C8FF'; ctx.fill();
-
-    ctx.restore();
-  }
-
-  /* BLOCK 7 ── secondary ghost echo ring (outer) ── */
-  ctx.save();
-  ctx.globalAlpha = da * dp * 0.18;
-  ctx.beginPath(); ctx.arc(CX, DCY, R+18, 0, PI2);
-  ctx.strokeStyle = '#1662FF'; ctx.lineWidth = 1.5; ctx.stroke();
   ctx.restore();
 }
 
-/* ─────────────────────── LOGO TEXT ─────────────────────── */
-function drawLogo(p) {
-  const la = env('logo', p);
-  if (la < 0.005) return;
+function drawLogo(p){
+  const la=env('logo',p);
+  if(la<0.005) return;
+  const y0=DCY+DR*1.115;
 
-  const y0 = DCY + DR * 1.115;
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
 
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-
-  // SAMSUNG
   ctx.save();
-  ctx.globalAlpha = la * 0.80;
-  ctx.font = `400 ${W*0.021}px 'Helvetica Neue', Helvetica, Arial, sans-serif`;
-  ctx.fillStyle = 'rgba(86,138,200,1)';
-  ctx.fillText('SAMSUNG', CX, y0);
+  ctx.globalAlpha=la*0.80;
+  ctx.font=`400 ${BASE*0.021}px 'Helvetica Neue', Helvetica, Arial, sans-serif`;
+  ctx.fillStyle='rgba(86,138,200,1)';
+  ctx.fillText('SAMSUNG',CX,y0);
   ctx.restore();
 
-  // WASH OS
   ctx.save();
-  ctx.globalAlpha = la * 0.96;
-  ctx.font = `800 ${W*0.038}px 'Helvetica Neue', Helvetica, Arial, sans-serif`;
-  ctx.fillStyle = 'rgba(212,230,255,1)';
-  ctx.fillText('WASH OS', CX, y0 + W*0.055);
+  ctx.globalAlpha=la*0.96;
+  ctx.font=`800 ${BASE*0.052}px 'Helvetica Neue', Helvetica, Arial, sans-serif`;
+  ctx.fillStyle='rgba(212,230,255,1)';
+  ctx.fillText('WASH OS',CX,y0+BASE*0.07);
   ctx.restore();
 
-  // gradient divider
   ctx.save();
-  ctx.globalAlpha = la * 0.50;
-  const dw = W*0.082;
-  const dg = ctx.createLinearGradient(CX-dw, 0, CX+dw, 0);
-  dg.addColorStop(0,   'rgba(0,200,255,0)');
-  dg.addColorStop(0.5, 'rgba(0,200,255,1)');
-  dg.addColorStop(1,   'rgba(0,200,255,0)');
-  ctx.beginPath();
-  ctx.moveTo(CX-dw, y0+W*0.095); ctx.lineTo(CX+dw, y0+W*0.095);
-  ctx.strokeStyle = dg; ctx.lineWidth = 0.8; ctx.stroke();
-  ctx.restore();
-
-  // Powered by goodapps Inc
-  ctx.save();
-  ctx.globalAlpha = la * 0.48;
-  ctx.font = `400 ${W*0.014}px 'Helvetica Neue', Helvetica, Arial, sans-serif`;
-  ctx.fillStyle = 'rgba(0,200,255,1)';
-  ctx.fillText('POWERED BY GOODAPPS INC.', CX, y0+W*0.118);
+  ctx.globalAlpha=la*0.48;
+  ctx.font=`400 ${BASE*0.018}px 'Helvetica Neue', Helvetica, Arial, sans-serif`;
+  ctx.fillStyle='rgba(0,200,255,1)';
+  ctx.fillText('POWERED BY WASH OS',CX,y0+BASE*0.13);
   ctx.restore();
 }
 
-/* ─────────────────────── FRAME LOOP ─────────────────────── */
-function frame(ts) {
-  if (!t0) t0 = ts;
-  const sec = (ts - t0) / 1000;
-  const p   = Math.min(sec / DUR, 1.0);
-
-  ctx.clearRect(0, 0, W, H);
-
+function frame(ts){
+  if(!t0) t0=ts;
+  const sec=(ts-t0)/1000;
+  const p=Math.min(sec/DUR,1.0);
+  ctx.clearRect(0,0,W,H);
   drawBG(p);
-  drawAmbient(sec, p);
-  drawWater(sec, p);
-  drawVortex(sec, p);
-  drawDrum(sec, p);
+  drawAmbient(sec,p);
+  drawWater(sec,p);
+  drawVortex(sec,p);
+  drawDrum(sec,p);
   drawLogo(p);
 
-  if (p < 1.0) {
-    requestAnimationFrame(frame);
-  } else {
-    setTimeout(() => { t0 = null; requestAnimationFrame(frame); }, 4000);
-  }
+  if(p<1) requestAnimationFrame(frame);
+  else setTimeout(()=>{t0=null; requestAnimationFrame(frame);}, 3000);
 }
 
+window.addEventListener('resize', setSize);
+setSize();
 requestAnimationFrame(frame);
 </script>
 </body>
